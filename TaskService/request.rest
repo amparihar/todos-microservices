@@ -1,0 +1,24 @@
+
+GET http://localhost:4030/api/task/health-check
+
+###
+
+GET http://localhost:4030/api/task/list
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJVMiIsImlhdCI6MTYwMTM3Nzk3Mn0.gRGSbpvNVsZxsYl_wp0gCKW6Snc4TzmBMI97PedUEcQ
+
+###
+
+POST http://localhost:4030/api/task
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJVMiIsImlhdCI6MTYwMTM3Nzk3Mn0.gRGSbpvNVsZxsYl_wp0gCKW6Snc4TzmBMI97PedUEcQ
+Content-Type: application/json
+
+{
+    "id": "T1",
+    "name": "First Task Updated",
+    "groupId": "G2",
+    "isComplete": false
+}
+
+###
+
+

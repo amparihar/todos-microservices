@@ -1,0 +1,24 @@
+POST http://localhost:4028/api/user/signup
+Content-Type: application/json
+
+{
+    "id":"U2",
+    "username" : "foo",
+    "password": "P@ssw0rd"
+}
+
+###
+
+GET http://localhost:4028/api/user/health-check
+
+###
+
+POST http://localhost:4028/api/user/signin
+Content-Type: application/json
+
+{
+    "username" : "foo",
+    "password": "P@ssw0rd"
+}
+
+
