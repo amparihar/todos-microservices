@@ -1,8 +1,6 @@
-//export const baseUrl = 'https://8rjrou3fe4.execute-api.ap-south-1.amazonaws.com/dev/todos/v1';
-
-export const baseUserUrl = 'http://localhost:4096/api';
-export const baseGroupUrl = 'http://localhost:5096/api';
-export const baseTaskUrl = 'http://localhost:6096/api';
+export const baseUserUrl = window.API_BASE_URL.USER;
+export const baseGroupUrl = window.API_BASE_URL.GROUP;
+export const baseTaskUrl = window.API_BASE_URL.TASK;
 
 export async function handleResponse(response) {
   if (response.ok) {
