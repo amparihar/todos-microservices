@@ -3,6 +3,7 @@ console.log("Initializing task microservice");
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const utils = require("./utils");
 
 const routes = {
@@ -10,17 +11,17 @@ const routes = {
 };
 
 var app = express();
+app.set("port", 6096);
+app.use(cors());
 
-app.set("port", 4030);
-
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Header",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Header",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
