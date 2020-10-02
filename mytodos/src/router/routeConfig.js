@@ -63,6 +63,13 @@ const config = [
     active: true,
   },
   {
+    path: '/health-check',
+    exact: false,
+    component: component.HealthCheck,
+    ignoreAuth: true,
+    active: true,
+  },
+  {
     path: '*',
     exact: false,
     component: component.NotFound,
