@@ -67,7 +67,7 @@ const config = [
     exact: false,
     component: component.HealthCheck,
     ignoreAuth: true,
-    active: true,
+    active: false,
   },
   {
     path: '*',
