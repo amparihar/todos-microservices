@@ -4,6 +4,6 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-EXPOSE 4028
+EXPOSE 4096
 
 CMD ["npm", "run", "start-server"]

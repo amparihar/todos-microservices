@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const groupRepo = require("../repo/groupRepo");
 const env = require("../../envConfig");
 const utils = require("../utils");
+const { saveGroupSchema } = require("../validation-schema");
 
 function authorizationFn(req, res, next) {
   var authToken = req.headers["authorization"],
@@ -32,6 +33,15 @@ function authorizationFn(req, res, next) {
   }
 }
 
+async function validateSaveGroupSchema(req, res, next) {
+  try {
+    await saveGroupSchema.validateAsync(req.body, { abortEarly: true });
+    return next();
+  } catch (err) {
+    utils.handleBadRequest(err, req, res, next);
+  }
+}
+
 var routes = function (app, handlerfn) {
   app.route("/api/group/health-check").get(handlerfn, groupRepo.healthCheck);
 
@@ -39,7 +49,12 @@ var routes = function (app, handlerfn) {
     .route("/api/group/list")
     .get([handlerfn, authorizationFn], groupRepo.list);
 
-  app.route("/api/group").post([handlerfn, authorizationFn], groupRepo.save);
+  app
+    .route("/api/group")
+    .post(
+      [handlerfn, authorizationFn, validateSaveGroupSchema],
+      groupRepo.save
+    );
 };
 
 module.exports = routes;

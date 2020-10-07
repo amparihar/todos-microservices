@@ -18,6 +18,14 @@
       .send({ message: serverErr.error.friendlyMessage });
   };
 
+  utils.handleBadRequest = function (err, req, res, next) {
+    var validationErr = {
+      message: err.message,
+      error: err,
+    };
+    res.status(err.status || 400).send({ message: validationErr.message });
+  };
+
   utils.handleUnauthorized = function (res, code, body) {
     utils.handleResponse(res, code || 401, body || {
       message: utils.apiFriendlyMessages.UNAUTHORIZED,

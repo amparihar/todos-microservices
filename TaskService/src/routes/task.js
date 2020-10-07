@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const taskRepo = require("../repo/taskRepo");
 const env = require("../../envConfig");
 const utils = require("../utils");
+const { saveTaskSchema } = require("../validation-schema");
 
 function authorizationFn(req, res, next) {
   var authToken = req.headers["authorization"],
@@ -32,14 +33,23 @@ function authorizationFn(req, res, next) {
   }
 }
 
+async function validateSaveTaskSchema(req, res, next) {
+  try {
+    await saveTaskSchema.validateAsync(req.body, { abortEarly: true });
+    return next();
+  } catch (err) {
+    utils.handleBadRequest(err, req, res, next);
+  }
+}
+
 var routes = function (app, handlerfn) {
   app.route("/api/task/health-check").get(handlerfn, taskRepo.healthCheck);
 
-  app
-    .route("/api/task/list")
-    .get([handlerfn, authorizationFn], taskRepo.list);
+  app.route("/api/task/list").get([handlerfn, authorizationFn], taskRepo.list);
 
-  app.route("/api/task").post([handlerfn, authorizationFn], taskRepo.save);
+  app
+    .route("/api/task")
+    .post([handlerfn, authorizationFn, validateSaveTaskSchema], taskRepo.save);
 };
 
 module.exports = routes;

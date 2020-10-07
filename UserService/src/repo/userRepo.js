@@ -33,7 +33,7 @@ var signUp = async (req, res, next) => {
           );
         }
         const accessToken = jwt.sign({ uid: id }, env.JWT_ACCESS_TOKEN);
-        utils.handleSuccessResponse(res, { accessToken, username: username });
+        utils.handleResponse(res, 201, { accessToken, username: username });
       });
     }
   });
