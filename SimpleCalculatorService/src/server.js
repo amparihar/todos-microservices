@@ -35,7 +35,15 @@ calculator.routes(app, handlerFn);
 
 // 404 route
 app.use(function (req, res) {
-  res.status(404).send("No matching Route");
+  res
+    .status(404)
+    .send(
+      "No matching route found for " +
+        req.protocol +
+        "://" +
+        req.get("host") +
+        req.originalUrl
+    );
 });
 
 app.use(utils.handleServerError);
