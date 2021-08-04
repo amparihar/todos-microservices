@@ -5,6 +5,9 @@ const express = require("express");
 const cors = require("cors");
 const utils = require("./utils");
 
+const AWSXRay = require("aws-xray-sdk");
+const XRayExpress = AWSXRay.express;
+
 const calculator = {
   routes: require("./routes"),
 };
@@ -15,6 +18,8 @@ app.use(cors());
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+app.use(XRayExpress.openSegment("Simple Calculator Microservice"));
 
 function handlerFn(req, res, next) {
   next();
@@ -47,6 +52,8 @@ app.use(function (req, res) {
 });
 
 app.use(utils.handleServerError);
+
+app.use(XRayExpress.closeSegment());
 
 // start server
 app.listen(app.get("port"), function () {
