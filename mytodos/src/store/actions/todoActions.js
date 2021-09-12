@@ -46,6 +46,10 @@ function saveTaskFail(errorMsg) {
   return { type: actionTypes.SAVE_TASK_FAIL, errorMsg };
 }
 
+function updateGroupProgress(progress) {
+  return { type: actionTypes.UPDATE_GROUP_PROGRESS, progress };
+}
+
 // thunks
 export function requestGroups() {
   return (dispatch, getState) => {
@@ -103,6 +107,12 @@ export function requestSaveTask(task) {
       )
       .then(
         (rsp) => {
+          dispatch(
+            updateGroupProgress({
+              groupId: rsp.groupId,
+              progresspercent: rsp.progresspercent,
+            })
+          );
           task.id
             ? dispatch(updateTaskSuccess(rsp))
             : dispatch(addTaskSuccess(rsp));

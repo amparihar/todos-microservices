@@ -46,12 +46,20 @@ module "servicediscovery" {
   vpcid      = module.vpc.vpcid
 }
 
-output "mysqldb_service_name" {
-  value = module.servicediscovery.mysqldb_service_name
+output "mysqldb_discovery_service_name" {
+  value = module.servicediscovery.mysqldb_discovery_service_name
 }
 
-output "mysqldb_registry_arn" {
-  value = module.servicediscovery.mysqldb_registry_arn
+output "mysqldb_discovery_service_registry_arn" {
+  value = module.servicediscovery.mysqldb_discovery_service_registry_arn
+}
+
+output "progress_tracker_discovery_service_name" {
+  value = module.servicediscovery.progress_tracker_discovery_service_name
+}
+
+output "progress_tracker_discovery_service_registry_arn" {
+  value = module.servicediscovery.progress_tracker_discovery_service_registry_arn
 }
 
 # --------------------------------------------------------------
@@ -72,7 +80,10 @@ module "ecs" {
     "task_microservice"      = module.alb.task_microservice_target_group_arn
     "front_end_microservice" = module.alb.front_end_microservice_target_group_arn
   }
-  mysqldb_service_name = module.servicediscovery.mysqldb_service_name
-  mysqldb_registry_arn = module.servicediscovery.mysqldb_registry_arn
-  jwt_access_token     = var.jwt_access_token
+  mysqldb_discovery_service_name                  = module.servicediscovery.mysqldb_discovery_service_name
+  mysqldb_discovery_service_registry_arn          = module.servicediscovery.mysqldb_discovery_service_registry_arn
+  progress_tracker_discovery_service_name         = module.servicediscovery.progress_tracker_discovery_service_name
+  progress_tracker_discovery_service_registry_arn = module.servicediscovery.progress_tracker_discovery_service_registry_arn
+  jwt_access_token                                = var.jwt_access_token
 }
+

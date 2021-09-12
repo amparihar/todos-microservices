@@ -1,4 +1,4 @@
-console.log("Initializing group microservice");
+console.log("Initializing Progress Tracker microservice");
 
 const path = require("path");
 const express = require("express");
@@ -6,11 +6,11 @@ const cors = require("cors");
 const utils = require("./utils");
 
 const routes = {
-  group: require("./routes/group"),
+  progress: require("./routes/progressRoute"),
 };
 
 var app = express();
-app.set("port", 5096);
+app.set("port", 7096);
 app.use(cors());
 
 // app.use(function (req, res, next) {
@@ -46,7 +46,7 @@ app.route("/api").get(handlerFn, function (req, res) {
 //   res.sendFile(__dirname + "/public/groups.json");
 // });
 
-routes.group(app, handlerFn);
+routes.progress(app, handlerFn);
 
 // 404 route
 app.use(function (req, res) {
@@ -59,5 +59,7 @@ app.use(utils.handleServerError);
 
 // start server
 app.listen(app.get("port"), function () {
-  console.log("group microservice started on port " + app.get("port"));
+  console.log(
+    "Progress Tracker microservice started on port " + app.get("port")
+  );
 });

@@ -6,6 +6,7 @@ locals {
 resource "aws_vpc" "main" {
   count                = local.create_vpc ? 1 : 0
   cidr_block           = var.vpc_cidr
+  # dns settings are required to enable private hosted zone in VPC(i.e service discovery)
   enable_dns_support   = true
   enable_dns_hostnames = true
 

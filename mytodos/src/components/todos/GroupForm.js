@@ -2,16 +2,18 @@ import React, { Fragment, useState } from 'react';
 
 const GroupForm = ({ group, onSave, ...props }) => {
   const [formState, setFormState] = useState({ ...group });
-  const handleOnChange = e => {
+  const handleOnChange = (e) => {
     const { name, value } = e.target;
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formState);
+    // Exclude progresspercent attribute from the group object as it is a computed field
+    const { progresspercent, ...group } = formState;
+    onSave(group);
   };
   return (
     <Fragment>

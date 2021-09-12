@@ -1,22 +1,46 @@
 import React, { useState } from 'react';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
 import { Modal } from '../../common';
 import ManageGroup from './ManageGroup';
 
-const WrappedTaskList = ({ id: groupId, name: groupName, tasks, ...props }) => {
+const WrappedTaskList = ({
+  id: groupId,
+  name: groupName,
+  progresspercent = 0,
+  tasks,
+  ...props
+}) => {
   const [displayModal, setDisplayModal] = useState(false);
   const handleEditGroupClick = (e) => {
     e.preventDefault();
     setDisplayModal(true);
   };
-  // useEffect(() => {
-  //   console.log(groupId);
-  // }, [groupId]);
+
   return (
     <div className="card">
       <div className="card-header" onClick={handleEditGroupClick}>
-        <h4 style={{ cursor: 'pointer', color: 'blue' }}>{groupName} </h4>
+        <div className="row">
+          <div className="col-sm-6">
+            <h4 style={{ cursor: 'pointer', color: 'blue' }}>{groupName} </h4>
+          </div>
+          <div className="col-sm-6">
+            <div style={{ width: 40, height: 40 }} className="float-right">
+              <CircularProgressbar
+                value={progresspercent}
+                text={`${progresspercent}%`}
+                strokeWidth={12}
+                styles={buildStyles({
+                  textColor: 'orangered',
+                  pathColor: `#28a745`,
+                  trailColor: `#dc3545`,
+                  textSize: '25px',
+                })}
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <ul className="list-group list-group-flush">
         {tasks.map((task) => (
@@ -25,7 +49,7 @@ const WrappedTaskList = ({ id: groupId, name: groupName, tasks, ...props }) => {
               {' '}
               <span
                 style={
-                  task.isComplete
+                  task.isCompleted
                     ? { textDecoration: 'line-through' }
                     : { textDecoration: 'none' }
                 }
@@ -39,7 +63,7 @@ const WrappedTaskList = ({ id: groupId, name: groupName, tasks, ...props }) => {
       <div className="card-body">
         <Link to={`${props.match.url}/task/0/${groupId}`}>
           <button className="btn btn-primary" type="button">
-            Add Task
+            Add New Task
           </button>
         </Link>
       </div>
@@ -67,8 +91,14 @@ const WrappedTaskList = ({ id: groupId, name: groupName, tasks, ...props }) => {
 
 const mapStateToProps = (state, ownProps) => {
   const { id: groupId } = ownProps;
+  // completed task appear last
+  const tasks = state.todos.task.tasks
+    .filter((task) => task.groupId === groupId)
+    .sort((a, b) =>
+      a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1
+    );
   return {
-    tasks: state.todos.task.tasks.filter((task) => task.groupId === groupId),
+    tasks,
   };
 };
 

@@ -13,7 +13,9 @@ const WrappedTaskForm = ({ task, ...props }) => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    props.save(formState);
+    // Exclude progresspercent attribute from the task object as it is a computed field
+    const { progresspercent, ...task } = formState;
+    props.save(task);
     handleBack();
   };
   return (
@@ -37,8 +39,8 @@ const WrappedTaskForm = ({ task, ...props }) => {
               <label className="mr-2">Completed</label>
               <input
                 type="checkbox"
-                name="isComplete"
-                checked={formState.isComplete}
+                name="isCompleted"
+                checked={formState.isCompleted}
                 onChange={handleOnChange}
               />
             </div>

@@ -10,8 +10,6 @@ var envConfig = {
   RDS_CONN_POOL_SIZE: process.env.RDS_CONN_POOL_SIZE,
   JWT_ACCESS_TOKEN: process.env.JWT_ACCESS_TOKEN,
   JWT_REFRESH_TOKEN: process.env.JWT_REFRESH_TOKEN,
-  PROGRESS_TRACKER_API_HOST: process.env.PROGRESS_TRACKER_API_HOST,
-  PROGRESS_TRACKER_API_PORT: process.env.PROGRESS_TRACKER_API_PORT,
 };
 
 module.exports = envConfig;

@@ -64,7 +64,7 @@ resource "aws_ecs_task_definition" "user_microservice" {
         "environment" = [
           {
             "name"  = "RDS_HOST"
-            "value" = var.mysqldb_service_name
+            "value" = var.mysqldb_discovery_service_name
           },
           {
             "name"  = "RDS_PORT"
@@ -117,7 +117,7 @@ resource "aws_ecs_task_definition" "group_microservice" {
         "environment" = [
           {
             name  = "RDS_HOST"
-            value = var.mysqldb_service_name
+            value = var.mysqldb_discovery_service_name
           },
           {
             name  = "RDS_PORT"
@@ -142,6 +142,14 @@ resource "aws_ecs_task_definition" "group_microservice" {
           {
             name  = "JWT_ACCESS_TOKEN"
             value = var.jwt_access_token
+          },
+          {
+            name  = "PROGRESS_TRACKER_API_HOST"
+            value = var.progress_tracker_discovery_service_name
+          },
+          {
+            name  = "PROGRESS_TRACKER_API_PORT"
+            value = var.container_ports["progress_tracker_microservice"]
           }
         ]
       }
@@ -170,7 +178,69 @@ resource "aws_ecs_task_definition" "task_microservice" {
         "environment" = [
           {
             name  = "RDS_HOST"
-            value = var.mysqldb_service_name
+            value = var.mysqldb_discovery_service_name
+          },
+          {
+            name  = "RDS_PORT"
+            value = tostring("${var.container_ports["mysql_db_microservice"]}")
+          },
+          {
+            name  = "RDS_DB_NAME"
+            value = "todosdb"
+          },
+          {
+            name  = "RDS_USERNAME"
+            value = "admin"
+          },
+          {
+            name  = "RDS_PASSWORD"
+            value = "Password123"
+          },
+          {
+            name  = "RDS_CONN_POOL_SIZE"
+            value = "2"
+          },
+          {
+            name  = "JWT_ACCESS_TOKEN"
+            value = var.jwt_access_token
+          },
+          {
+            name  = "PROGRESS_TRACKER_API_HOST"
+            value = var.progress_tracker_discovery_service_name
+          },
+          {
+            name  = "PROGRESS_TRACKER_API_PORT"
+            value = var.container_ports["progress_tracker_microservice"]
+          }
+        ]
+      }
+  ])
+}
+
+# Progress Tracker microservice task def
+resource "aws_ecs_task_definition" "progress_tracker_microservice" {
+  family                   = "td-progress-tracker-microservice-${local.name_suffix}"
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  memory                   = var.task_memory["progress_tracker_microservice"]
+  cpu                      = var.task_cpu["progress_tracker_microservice"]
+
+  container_definitions = jsonencode(
+    [
+      {
+        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:progress-tracker-microsvc"
+        "name"  = "progress-tracker-microservice-${local.name_suffix}"
+        "portMappings" = [
+          {
+            "containerPort" = var.container_ports["progress_tracker_microservice"]
+          }
+        ]
+        "environment" = [
+          {
+            name  = "RDS_HOST"
+            value = var.mysqldb_discovery_service_name
           },
           {
             name  = "RDS_PORT"
@@ -200,7 +270,6 @@ resource "aws_ecs_task_definition" "task_microservice" {
       }
   ])
 }
-
 resource "aws_ecs_task_definition" "mysql_db_microservice" {
   family                   = "td-mysql-db-microservice-${local.name_suffix}"
   task_role_arn            = aws_iam_role.ecs_task_role.arn
@@ -239,7 +308,7 @@ resource "aws_ecs_task_definition" "mysql_db_microservice" {
           },
           {
             name  = "DATABASE_HOST"
-            value = var.mysqldb_service_name
+            value = var.mysqldb_discovery_service_name
           }
         ]
       }
@@ -301,7 +370,7 @@ resource "aws_security_group" "ecs_load_balanced_frontend_microservices" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-   tags = {
+  tags = {
     Name  = "sg-ecs-load-balanced-frontend-microservices-${var.app_name}"
     Stage = var.stage_name
   }
@@ -329,7 +398,7 @@ resource "aws_security_group" "ecs_load_balanced_backend_microservices" {
     protocol        = "tcp"
     security_groups = [var.alb_security_group_id]
   }
-  
+
   # ingress {
   #   from_port       = 80
   #   to_port         = 80
@@ -350,7 +419,31 @@ resource "aws_security_group" "ecs_load_balanced_backend_microservices" {
   }
 }
 
-resource "aws_security_group" "ecs_mysql_db_microservices" {
+resource "aws_security_group" "ecs_progress_tracker_microservice" {
+  name   = "${var.app_name}-sg-ecs-progress-tracker-microservices-${var.stage_name}"
+  vpc_id = var.vpcid
+
+  ingress {
+    from_port       = var.container_ports["progress_tracker_microservice"]
+    to_port         = var.container_ports["progress_tracker_microservice"]
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_load_balanced_backend_microservices.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name  = "sg-ecs-ecs_progress-tracker-microservices-${var.app_name}"
+    Stage = var.stage_name
+  }
+}
+
+resource "aws_security_group" "ecs_mysql_db_microservice" {
   name   = "${var.app_name}-sg-ecs-mysql-db-microservices-${var.stage_name}"
   vpc_id = var.vpcid
 
@@ -369,7 +462,7 @@ resource "aws_security_group" "ecs_mysql_db_microservices" {
   }
 
   tags = {
-    Name  = "sg-ecs-ecs_mysql_db_microservices-${var.app_name}"
+    Name  = "sg-ecs-ecs-mysql-db-microservice-${var.app_name}"
     Stage = var.stage_name
   }
 }
@@ -440,25 +533,46 @@ resource "aws_ecs_service" "task_microservice" {
   }
 }
 
-resource "aws_ecs_service" "mysql_db_microservice" {
-  name                              = "mysql-db-ecs-svc-${local.name_suffix}"
-  cluster                           = aws_ecs_cluster.main.id
-  task_definition                   = aws_ecs_task_definition.mysql_db_microservice.arn
-  desired_count                     = 1
-  launch_type                       = "FARGATE"
-  scheduling_strategy               = "REPLICA"
-  
+resource "aws_ecs_service" "progress_tracker_microservice" {
+  name                = "progress-tracker-ecs-svc-${local.name_suffix}"
+  cluster             = aws_ecs_cluster.main.id
+  task_definition     = aws_ecs_task_definition.progress_tracker_microservice.arn
+  desired_count       = 2
+  launch_type         = "FARGATE"
+  scheduling_strategy = "REPLICA"
   # Health check grace period is only valid for services configured to use load balancers
 
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_mysql_db_microservices.id]
+    security_groups  = [aws_security_group.ecs_progress_tracker_microservice.id]
   }
 
   # service discovery
   service_registries {
-    registry_arn = var.mysqldb_registry_arn
+    registry_arn = var.progress_tracker_discovery_service_registry_arn
+  }
+}
+
+resource "aws_ecs_service" "mysql_db_microservice" {
+  name                = "mysql-db-ecs-svc-${local.name_suffix}"
+  cluster             = aws_ecs_cluster.main.id
+  task_definition     = aws_ecs_task_definition.mysql_db_microservice.arn
+  desired_count       = 1
+  launch_type         = "FARGATE"
+  scheduling_strategy = "REPLICA"
+
+  # Health check grace period is only valid for services configured to use load balancers
+
+  network_configuration {
+    assign_public_ip = true
+    subnets          = var.subnets
+    security_groups  = [aws_security_group.ecs_mysql_db_microservice.id]
+  }
+
+  # service discovery
+  service_registries {
+    registry_arn = var.mysqldb_discovery_service_registry_arn
   }
 }
 

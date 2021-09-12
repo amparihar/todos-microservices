@@ -37,10 +37,15 @@ const GroupList = ({
       <a href="#" onClick={handleAddNewClick} style={{ color: 'blue' }}>
         Add New
       </a>
+      <hr />
       <div className="card-columns">
         {groups.map((group) => (
           <div key={group.id}>
-            <ConnectedTaskList id={group.id} name={group.name} />
+            <ConnectedTaskList
+              id={group.id}
+              name={group.name}
+              progresspercent={group.progresspercent}
+            />
           </div>
         ))}
       </div>

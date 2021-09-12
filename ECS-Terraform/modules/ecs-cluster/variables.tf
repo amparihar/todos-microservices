@@ -22,10 +22,17 @@ variable "alb_dns_name" {
 variable "target_groups" {
   type = map(string)
 }
-variable "mysqldb_registry_arn" {
+variable "mysqldb_discovery_service_registry_arn" {
   type = string
 }
-variable "mysqldb_service_name" {
+variable "mysqldb_discovery_service_name" {
+  type = string
+}
+
+variable "progress_tracker_discovery_service_registry_arn" {
+  type = string
+}
+variable "progress_tracker_discovery_service_name" {
   type = string
 }
 
@@ -33,31 +40,34 @@ variable "mysqldb_service_name" {
 variable "task_cpu" {
   type = map(string)
   default = {
-    "user_microservice"      = "256"
-    "group_microservice"     = "256"
-    "task_microservice"      = "256"
-    "mysql_db_microservice"  = "1024"
-    "front_end_microservice" = "512"
+    "user_microservice"             = "256"
+    "group_microservice"            = "256"
+    "task_microservice"             = "256"
+    "progress_tracker_microservice" = "256"
+    "mysql_db_microservice"         = "1024"
+    "front_end_microservice"        = "512"
   }
 }
 variable "task_memory" {
   type = map(string)
   default = {
-    "user_microservice"      = "512"
-    "group_microservice"     = "512"
-    "task_microservice"      = "512"
-    "mysql_db_microservice"  = "2048"
-    "front_end_microservice" = "1024"
+    "user_microservice"             = "512"
+    "group_microservice"            = "512"
+    "task_microservice"             = "512"
+    "progress_tracker_microservice" = "512"
+    "mysql_db_microservice"         = "2048"
+    "front_end_microservice"        = "1024"
   }
 }
 variable "container_ports" {
   type = map(number)
   default = {
-    "user_microservice"      = 4096
-    "group_microservice"     = 5096
-    "task_microservice"      = 6096
-    "mysql_db_microservice"  = 3306
-    "front_end_microservice" = 80
+    "user_microservice"             = 4096
+    "group_microservice"            = 5096
+    "task_microservice"             = 6096
+    "progress_tracker_microservice" = 7096
+    "mysql_db_microservice"         = 3306
+    "front_end_microservice"        = 80
   }
 }
 variable "jwt_access_token" {

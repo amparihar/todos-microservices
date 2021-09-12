@@ -24,7 +24,7 @@ const todoReducer = combineReducers({ task, group });
 //         for (let task of draft.tasks) {
 //           if (task.id === action.task.id) {
 //             task.name = action.task.name;
-//             task.isComplete = action.task.isComplete;
+//             task.isCompleted = action.task.isCompleted;
 //             break;
 //           }
 //         }

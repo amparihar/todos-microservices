@@ -18,10 +18,33 @@ resource "aws_service_discovery_service" "mysql_db_microservice" {
   }
 }
 
-output "mysqldb_service_name" {
+resource "aws_service_discovery_service" "progress_tracker_microservice" {
+  name = "progress-tracker"
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+    dns_records {
+      ttl  = 300
+      type = "A"
+    }
+    routing_policy = "MULTIVALUE"
+  }
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
+output "mysqldb_discovery_service_name" {
   value = "${aws_service_discovery_service.mysql_db_microservice.name}.${aws_service_discovery_private_dns_namespace.main.name}"
 }
 
-output "mysqldb_registry_arn" {
+output "mysqldb_discovery_service_registry_arn" {
   value = aws_service_discovery_service.mysql_db_microservice.arn
+}
+
+output "progress_tracker_discovery_service_name" {
+  value = "${aws_service_discovery_service.progress_tracker_microservice.name}.${aws_service_discovery_private_dns_namespace.main.name}"
+}
+
+output "progress_tracker_discovery_service_registry_arn" {
+  value = aws_service_discovery_service.progress_tracker_microservice.arn
 }

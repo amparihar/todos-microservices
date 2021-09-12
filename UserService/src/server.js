@@ -2,7 +2,6 @@ console.log("Initializing user microservice");
 
 const path = require("path");
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const utils = require("./utils");
 
@@ -23,8 +22,8 @@ app.use(cors());
 //   next();
 // });
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 function handlerFn(req, res, next) {
   next();

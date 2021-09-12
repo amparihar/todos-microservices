@@ -7,6 +7,7 @@ export const LOADING_GROUPS = '[ToDos Group] Loading Groups';
 export const ADD_GROUP_SUCCESS = '[ToDos Group] Add Group Success';
 export const UPDATE_GROUP_SUCCESS = '[ToDos Group] Update Group Success';
 export const SAVE_GROUP_FAIL = '[Todos Group] Save Group Fail';
+export const UPDATE_GROUP_PROGRESS = '[Todos Group] Update Group Progress';
 
 export const GET_TASKS_SUCCESS = '[ToDos Task] Get Tasks Success';
 export const GET_TASKS_FAIL = '[ToDos Task] Get Tasks Fail';

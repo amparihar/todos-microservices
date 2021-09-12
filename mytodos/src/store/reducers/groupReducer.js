@@ -37,6 +37,15 @@ function groupReducer(state = initialState, action) {
           }
         }
       });
+    case actionTypes.UPDATE_GROUP_PROGRESS:
+      return produce(state, (draft) => {
+        for (let group of draft.groups) {
+          if (group.id === action.progress.groupId) {
+            group.progresspercent = action.progress.progresspercent;
+            break;
+          }
+        }
+      });
     case actionTypes.SAVE_GROUP_FAIL:
       return produce(state, (draft) => {
         draft.error = action.errorMsg;
