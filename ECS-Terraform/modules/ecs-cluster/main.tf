@@ -53,7 +53,7 @@ resource "aws_ecs_task_definition" "user_microservice" {
   container_definitions = jsonencode(
     [
       {
-        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:user-microsvc"
+        "image" = var.container_images["user_microservice"]
         "name"  = "user-microservice-${local.name_suffix}"
         "portMappings" = [
           {
@@ -107,7 +107,7 @@ resource "aws_ecs_task_definition" "group_microservice" {
   container_definitions = jsonencode(
     [
       {
-        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:group-microsvc"
+        "image" = var.container_images["group_microservice"]
         "name"  = "group-microservice-${local.name_suffix}"
         "portMappings" = [
           {
@@ -149,7 +149,7 @@ resource "aws_ecs_task_definition" "group_microservice" {
           },
           {
             name  = "PROGRESS_TRACKER_API_PORT"
-            value = var.container_ports["progress_tracker_microservice"]
+            value = tostring(var.container_ports["progress_tracker_microservice"])
           }
         ]
       }
@@ -168,7 +168,7 @@ resource "aws_ecs_task_definition" "task_microservice" {
   container_definitions = jsonencode(
     [
       {
-        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:task-microsvc"
+        "image" = var.container_images["task_microservice"]
         "name"  = "task-microservice-${local.name_suffix}"
         "portMappings" = [
           {
@@ -210,7 +210,7 @@ resource "aws_ecs_task_definition" "task_microservice" {
           },
           {
             name  = "PROGRESS_TRACKER_API_PORT"
-            value = var.container_ports["progress_tracker_microservice"]
+            value = tostring(var.container_ports["progress_tracker_microservice"])
           }
         ]
       }
@@ -230,7 +230,7 @@ resource "aws_ecs_task_definition" "progress_tracker_microservice" {
   container_definitions = jsonencode(
     [
       {
-        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:progress-tracker-microsvc"
+        "image" = var.container_images["progress_tracker_microservice"]
         "name"  = "progress-tracker-microservice-${local.name_suffix}"
         "portMappings" = [
           {
@@ -282,7 +282,7 @@ resource "aws_ecs_task_definition" "mysql_db_microservice" {
   container_definitions = jsonencode(
     [
       {
-        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:mysql-db-microsvc"
+        "image" = var.container_images["mysql_db_microservice"]
         "name"  = "mysql-db-microservice-${local.name_suffix}"
         "portMappings" = [
           {
@@ -327,7 +327,7 @@ resource "aws_ecs_task_definition" "front_end_microservice" {
   container_definitions = jsonencode(
     [
       {
-        "image" = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:mytodos-microsvc"
+        "image" = var.container_images["front_end_microservice"]
         "name"  = "front-end-microservice-${local.name_suffix}"
         "portMappings" = [
           {

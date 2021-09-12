@@ -73,3 +73,14 @@ variable "container_ports" {
 variable "jwt_access_token" {
   type = string
 }
+variable "container_images" {
+  type = map(string)
+  default = {
+    user_microservice             = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:user-microsvc-v2"
+    group_microservice            = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:group-microsvc-v2"
+    task_microservice             = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:task-microsvc-v2"
+    progress_tracker_microservice = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:progress-tracker-microsvc-v2"
+    mysql_db_microservice         = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:mysql-db-microsvc"
+    front_end_microservice        = "785548451685.dkr.ecr.ap-south-1.amazonaws.com/todos:mytodos-microsvc-v2"
+  }
+}
