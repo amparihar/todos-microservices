@@ -69,6 +69,7 @@ module "ecs" {
   source                = "./modules/ecs-cluster"
   app_name              = var.app_name
   stage_name            = var.stage_name
+  regionid              = var.aws_regions[var.aws_region]
   ecs_cluster_name      = var.ecs_cluster_name
   vpcid                 = module.vpc.vpcid
   subnets               = module.vpc.public_subnet_ids

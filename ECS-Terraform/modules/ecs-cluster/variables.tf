@@ -4,6 +4,9 @@ variable "app_name" {
 variable "stage_name" {
   type = string
 }
+variable "regionid" {
+  type = string
+}
 variable "ecs_cluster_name" {
   type = string
 }
@@ -67,7 +70,7 @@ variable "container_ports" {
     "task_microservice"             = 6096
     "progress_tracker_microservice" = 7096
     "mysql_db_microservice"         = 3306
-    "front_end_microservice"        = 80
+    "front_end_microservice"        = 3000
   }
 }
 variable "jwt_access_token" {

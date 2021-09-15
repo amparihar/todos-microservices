@@ -114,6 +114,15 @@ resource "aws_ecs_task_definition" "group_microservice" {
             "containerPort" = var.container_ports["group_microservice"]
           }
         ]
+        "logConfiguration" = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-create-group  = "true"
+            awslogs-region        = var.regionid
+            awslogs-group         = "/ecs/${var.ecs_cluster_name}/group-microservice"
+            awslogs-stream-prefix = "ecs"
+          }
+        }
         "environment" = [
           {
             name  = "RDS_HOST"
@@ -175,6 +184,15 @@ resource "aws_ecs_task_definition" "task_microservice" {
             "containerPort" = var.container_ports["task_microservice"]
           }
         ]
+        # "logConfiguration" = {
+        #   logDriver = "awslogs"
+        #   options = {
+        #     awslogs-create-group  = "true"
+        #     awslogs-region        = var.regionid
+        #     awslogs-group         = "/ecs/${var.ecs_cluster_name}/task-microservice"
+        #     awslogs-stream-prefix = "ecs"
+        #   }
+        # }
         "environment" = [
           {
             name  = "RDS_HOST"
@@ -237,6 +255,15 @@ resource "aws_ecs_task_definition" "progress_tracker_microservice" {
             "containerPort" = var.container_ports["progress_tracker_microservice"]
           }
         ]
+        # "logConfiguration" = {
+        #   logDriver = "awslogs"
+        #   options = {
+        #     awslogs-create-group  = "true"
+        #     awslogs-region        = var.regionid
+        #     awslogs-group         = "/ecs/${var.ecs_cluster_name}/progress-tracker-microservice"
+        #     awslogs-stream-prefix = "ecs"
+        #   }
+        # }
         "environment" = [
           {
             name  = "RDS_HOST"
@@ -448,10 +475,13 @@ resource "aws_security_group" "ecs_mysql_db_microservice" {
   vpc_id = var.vpcid
 
   ingress {
-    from_port       = var.container_ports["mysql_db_microservice"]
-    to_port         = var.container_ports["mysql_db_microservice"]
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_load_balanced_backend_microservices.id]
+    from_port = var.container_ports["mysql_db_microservice"]
+    to_port   = var.container_ports["mysql_db_microservice"]
+    protocol  = "tcp"
+    security_groups = [
+      aws_security_group.ecs_load_balanced_backend_microservices.id,
+      aws_security_group.ecs_progress_tracker_microservice.id
+    ]
   }
 
   egress {

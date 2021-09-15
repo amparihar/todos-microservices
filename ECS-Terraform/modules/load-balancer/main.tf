@@ -147,7 +147,6 @@ resource "aws_lb_listener" "microservice" {
 
   default_action {
     type = "fixed-response"
-
     fixed_response {
       content_type = "text/plain"
       message_body = "The path you are looking for is unavaliable"

@@ -31,6 +31,7 @@ data "aws_iam_policy_document" "ecs_task_execution_role_iam_policy" {
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
+      "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]

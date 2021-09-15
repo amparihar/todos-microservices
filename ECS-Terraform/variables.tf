@@ -4,7 +4,7 @@ variable "app_name" {
 }
 variable "stage_name" {
   type    = string
-  default = "non-prod"
+  default = "dev-int"
 }
 
 variable "aws_region" {
