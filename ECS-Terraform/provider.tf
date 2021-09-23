@@ -9,10 +9,15 @@ module "vpc" {
   source     = "./modules/vpc"
   app_name   = var.app_name
   stage_name = var.stage_name
+
 }
 
 output "vpcid" {
   value = [module.vpc.vpcid]
+}
+
+output "public_subnet_ids" {
+  value = module.vpc.public_subnet_ids
 }
 
 # --------------------------------------------------------------
@@ -33,6 +38,19 @@ output "alb_arn" {
 
 output "alb_dns_name" {
   value = module.alb.dns_name
+}
+
+# --------------------------------------------------------------
+# Security Groups
+# --------------------------------------------------------------
+
+module "sg" {
+  source                = "./modules/security-groups"
+  app_name              = var.app_name
+  stage_name            = var.stage_name
+  vpcid                 = module.vpc.vpcid
+  container_ports       = var.app_container_ports
+  alb_security_group_id = module.alb.security_group_id
 }
 
 # --------------------------------------------------------------
@@ -63,18 +81,29 @@ output "progress_tracker_discovery_service_registry_arn" {
 }
 
 # --------------------------------------------------------------
+# IAM
+# --------------------------------------------------------------
+
+module "iam" {
+  source = "./modules/iam"
+}
+
+# --------------------------------------------------------------
 # ECS Fargate
 # --------------------------------------------------------------
-module "ecs" {
-  source                = "./modules/ecs-cluster"
-  app_name              = var.app_name
-  stage_name            = var.stage_name
-  regionid              = var.aws_regions[var.aws_region]
-  ecs_cluster_name      = var.ecs_cluster_name
-  vpcid                 = module.vpc.vpcid
-  subnets               = module.vpc.public_subnet_ids
-  alb_security_group_id = module.alb.security_group_id
-  alb_dns_name          = module.alb.dns_name[0]
+module "ecs_fargate" {
+  source                      = "./modules/ecs-fargate-cluster"
+  app_name                    = var.app_name
+  stage_name                  = var.stage_name
+  ecs_task_role_arn           = module.iam.ecs_task_role_arn
+  ecs_task_execution_role_arn = module.iam.ecs_task_execution_role_arn
+  regionid                    = var.aws_regions[var.aws_region]
+  ecs_fargate_cluster_name    = var.ecs_fargate_cluster_name
+  security_group_ids          = module.sg.security_group_ids
+  subnets                     = module.vpc.public_subnet_ids
+  alb_dns_name                = module.alb.dns_name[0]
+  container_ports             = var.app_container_ports
+  container_images            = var.app_container_images
   target_groups = {
     "user_microservice"      = module.alb.user_microservice_target_group_arn
     "group_microservice"     = module.alb.group_microservice_target_group_arn
@@ -88,3 +117,23 @@ module "ecs" {
   jwt_access_token                                = var.jwt_access_token
 }
 
+# --------------------------------------------------------------
+# ECS EC2
+# --------------------------------------------------------------
+module "ecs_ec2" {
+  source                                          = "./modules/ecs-ec2-cluster"
+  app_name                                        = var.app_name
+  stage_name                                      = var.stage_name
+  ecs_task_execution_role_arn                     = module.iam.ecs_task_execution_role_arn
+  ecs_ec2_instance_role_name                      = module.iam.ecs_ec2_instance_role_name
+  regionid                                        = var.aws_regions[var.aws_region]
+  ecs_ec2_cluster_name                            = var.ecs_ec2_cluster_name
+  security_group_ids                              = module.sg.security_group_ids
+  vpcid                                           = module.vpc.vpcid
+  subnets                                         = module.vpc.public_subnet_ids
+  container_ports                                 = var.app_container_ports
+  container_images                                = var.app_container_images
+  mysqldb_discovery_service_name                  = module.servicediscovery.mysqldb_discovery_service_name
+  progress_tracker_discovery_service_registry_arn = module.servicediscovery.progress_tracker_discovery_service_registry_arn
+  jwt_access_token                                = var.jwt_access_token
+}

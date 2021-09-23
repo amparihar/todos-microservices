@@ -1,37 +1,5 @@
-# task role
-resource "aws_iam_policy" "ecs_task_role_iam_policy" {
-  path   = "/" # Path in which to create the policy
-  policy = data.aws_iam_policy_document.ecs_task_role_iam_policy.json
-}
-
-resource "aws_iam_role" "ecs_task_role" {
-  path               = "/"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_role_assume_role_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "task_role_policy_attachment" {
-  role       = aws_iam_role.ecs_task_role.name
-  policy_arn = aws_iam_policy.ecs_task_role_iam_policy.arn
-}
-
-# task execution role
-resource "aws_iam_policy" "ecs_task_execution_role_iam_policy" {
-  path   = "/" # Path in which to create the policy
-  policy = data.aws_iam_policy_document.ecs_task_execution_role_iam_policy.json
-}
-
-resource "aws_iam_role" "ecs_task_execution_role" {
-  path               = "/"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role_assume_role_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "task_execution_role_policy_attachment" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = aws_iam_policy.ecs_task_execution_role_iam_policy.arn
-}
-
-resource "aws_ecs_cluster" "main" {
-  name = var.ecs_cluster_name
+resource "aws_ecs_cluster" "fargate" {
+  name = var.ecs_fargate_cluster_name
 
   setting {
     name  = "containerInsights"
@@ -39,10 +7,11 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
+# ECS Task Defs
 resource "aws_ecs_task_definition" "user_microservice" {
   family                   = "td-user-microservice-${local.name_suffix}"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = var.ecs_task_role_arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   memory                   = var.task_memory["user_microservice"]
@@ -97,8 +66,8 @@ resource "aws_ecs_task_definition" "user_microservice" {
 
 resource "aws_ecs_task_definition" "group_microservice" {
   family                   = "td-group-microservice-${local.name_suffix}"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = var.ecs_task_role_arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   memory                   = var.task_memory["group_microservice"]
@@ -119,7 +88,7 @@ resource "aws_ecs_task_definition" "group_microservice" {
           options = {
             awslogs-create-group  = "true"
             awslogs-region        = var.regionid
-            awslogs-group         = "/ecs/${var.ecs_cluster_name}/group-microservice"
+            awslogs-group         = "/ecs/${var.ecs_fargate_cluster_name}/group-microservice"
             awslogs-stream-prefix = "ecs"
           }
         }
@@ -167,8 +136,8 @@ resource "aws_ecs_task_definition" "group_microservice" {
 
 resource "aws_ecs_task_definition" "task_microservice" {
   family                   = "td-task-microservice-${local.name_suffix}"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = var.ecs_task_role_arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   memory                   = var.task_memory["task_microservice"]
@@ -189,7 +158,7 @@ resource "aws_ecs_task_definition" "task_microservice" {
         #   options = {
         #     awslogs-create-group  = "true"
         #     awslogs-region        = var.regionid
-        #     awslogs-group         = "/ecs/${var.ecs_cluster_name}/task-microservice"
+        #     awslogs-group         = "/ecs/${var.ecs_fargate_cluster_name}/task-microservice"
         #     awslogs-stream-prefix = "ecs"
         #   }
         # }
@@ -236,71 +205,72 @@ resource "aws_ecs_task_definition" "task_microservice" {
 }
 
 # Progress Tracker microservice task def
-resource "aws_ecs_task_definition" "progress_tracker_microservice" {
-  family                   = "td-progress-tracker-microservice-${local.name_suffix}"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  memory                   = var.task_memory["progress_tracker_microservice"]
-  cpu                      = var.task_cpu["progress_tracker_microservice"]
+# resource "aws_ecs_task_definition" "progress_tracker_microservice" {
+#   family                   = "td-progress-tracker-microservice-${local.name_suffix}"
+#   task_role_arn            = var.ecs_task_role_arn
+#   execution_role_arn       = var.ecs_task_execution_role_arn
+#   network_mode             = "awsvpc"
+#   requires_compatibilities = ["FARGATE"]
+#   memory                   = var.task_memory["progress_tracker_microservice"]
+#   cpu                      = var.task_cpu["progress_tracker_microservice"]
 
-  container_definitions = jsonencode(
-    [
-      {
-        "image" = var.container_images["progress_tracker_microservice"]
-        "name"  = "progress-tracker-microservice-${local.name_suffix}"
-        "portMappings" = [
-          {
-            "containerPort" = var.container_ports["progress_tracker_microservice"]
-          }
-        ]
-        # "logConfiguration" = {
-        #   logDriver = "awslogs"
-        #   options = {
-        #     awslogs-create-group  = "true"
-        #     awslogs-region        = var.regionid
-        #     awslogs-group         = "/ecs/${var.ecs_cluster_name}/progress-tracker-microservice"
-        #     awslogs-stream-prefix = "ecs"
-        #   }
-        # }
-        "environment" = [
-          {
-            name  = "RDS_HOST"
-            value = var.mysqldb_discovery_service_name
-          },
-          {
-            name  = "RDS_PORT"
-            value = tostring("${var.container_ports["mysql_db_microservice"]}")
-          },
-          {
-            name  = "RDS_DB_NAME"
-            value = "todosdb"
-          },
-          {
-            name  = "RDS_USERNAME"
-            value = "admin"
-          },
-          {
-            name  = "RDS_PASSWORD"
-            value = "Password123"
-          },
-          {
-            name  = "RDS_CONN_POOL_SIZE"
-            value = "2"
-          },
-          {
-            name  = "JWT_ACCESS_TOKEN"
-            value = var.jwt_access_token
-          }
-        ]
-      }
-  ])
-}
+#   container_definitions = jsonencode(
+#     [
+#       {
+#         "image" = var.container_images["progress_tracker_microservice"]
+#         "name"  = "progress-tracker-microservice-${local.name_suffix}"
+#         "portMappings" = [
+#           {
+#             "containerPort" = var.container_ports["progress_tracker_microservice"]
+#             "hostPort"      = var.container_ports["progress_tracker_microservice"]
+#           }
+#         ]
+#         # "logConfiguration" = {
+#         #   logDriver = "awslogs"
+#         #   options = {
+#         #     awslogs-create-group  = "true"
+#         #     awslogs-region        = var.regionid
+#         #     awslogs-group         = "/ecs/${var.ecs_fargate_cluster_name}/progress-tracker-microservice"
+#         #     awslogs-stream-prefix = "ecs"
+#         #   }
+#         # }
+#         "environment" = [
+#           {
+#             name  = "RDS_HOST"
+#             value = var.mysqldb_discovery_service_name
+#           },
+#           {
+#             name  = "RDS_PORT"
+#             value = tostring("${var.container_ports["mysql_db_microservice"]}")
+#           },
+#           {
+#             name  = "RDS_DB_NAME"
+#             value = "todosdb"
+#           },
+#           {
+#             name  = "RDS_USERNAME"
+#             value = "admin"
+#           },
+#           {
+#             name  = "RDS_PASSWORD"
+#             value = "Password123"
+#           },
+#           {
+#             name  = "RDS_CONN_POOL_SIZE"
+#             value = "2"
+#           },
+#           {
+#             name  = "JWT_ACCESS_TOKEN"
+#             value = var.jwt_access_token
+#           }
+#         ]
+#       }
+#   ])
+# }
 resource "aws_ecs_task_definition" "mysql_db_microservice" {
   family                   = "td-mysql-db-microservice-${local.name_suffix}"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = var.ecs_task_role_arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   memory                   = var.task_memory["mysql_db_microservice"]
@@ -344,8 +314,8 @@ resource "aws_ecs_task_definition" "mysql_db_microservice" {
 
 resource "aws_ecs_task_definition" "front_end_microservice" {
   family                   = "td-front-end-microservice-${local.name_suffix}"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = var.ecs_task_role_arn
+  execution_role_arn       = var.ecs_task_execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   memory                   = var.task_memory["front_end_microservice"]
@@ -379,127 +349,10 @@ resource "aws_ecs_task_definition" "front_end_microservice" {
   ])
 }
 
-resource "aws_security_group" "ecs_load_balanced_frontend_microservices" {
-  name   = "${var.app_name}-sg-ecs-load-balanced-frontend-microservices-${var.stage_name}"
-  vpc_id = var.vpcid
-
-  ingress {
-    from_port       = var.container_ports["front_end_microservice"]
-    to_port         = var.container_ports["front_end_microservice"]
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "sg-ecs-load-balanced-frontend-microservices-${var.app_name}"
-    Stage = var.stage_name
-  }
-}
-
-resource "aws_security_group" "ecs_load_balanced_backend_microservices" {
-  name   = "${var.app_name}-sg-ecs-load-balanced-backend-microservices-${var.stage_name}"
-  vpc_id = var.vpcid
-
-  ingress {
-    from_port       = var.container_ports["user_microservice"]
-    to_port         = var.container_ports["user_microservice"]
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-  }
-  ingress {
-    from_port       = var.container_ports["group_microservice"]
-    to_port         = var.container_ports["group_microservice"]
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-  }
-  ingress {
-    from_port       = var.container_ports["task_microservice"]
-    to_port         = var.container_ports["task_microservice"]
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-  }
-
-  # ingress {
-  #   from_port       = 80
-  #   to_port         = 80
-  #   protocol        = "tcp"
-  #   cidr_blocks = ["0.0.0.0/0"]
-  # }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "sg-ecs-load-balanced-backend-microservices-${var.app_name}"
-    Stage = var.stage_name
-  }
-}
-
-resource "aws_security_group" "ecs_progress_tracker_microservice" {
-  name   = "${var.app_name}-sg-ecs-progress-tracker-microservices-${var.stage_name}"
-  vpc_id = var.vpcid
-
-  ingress {
-    from_port       = var.container_ports["progress_tracker_microservice"]
-    to_port         = var.container_ports["progress_tracker_microservice"]
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_load_balanced_backend_microservices.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "sg-ecs-ecs_progress-tracker-microservices-${var.app_name}"
-    Stage = var.stage_name
-  }
-}
-
-resource "aws_security_group" "ecs_mysql_db_microservice" {
-  name   = "${var.app_name}-sg-ecs-mysql-db-microservices-${var.stage_name}"
-  vpc_id = var.vpcid
-
-  ingress {
-    from_port = var.container_ports["mysql_db_microservice"]
-    to_port   = var.container_ports["mysql_db_microservice"]
-    protocol  = "tcp"
-    security_groups = [
-      aws_security_group.ecs_load_balanced_backend_microservices.id,
-      aws_security_group.ecs_progress_tracker_microservice.id
-    ]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "sg-ecs-ecs-mysql-db-microservice-${var.app_name}"
-    Stage = var.stage_name
-  }
-}
-
+# ECS Services
 resource "aws_ecs_service" "user_microservice" {
   name                              = "user-ecs-svc-${local.name_suffix}"
-  cluster                           = aws_ecs_cluster.main.id
+  cluster                           = aws_ecs_cluster.fargate.id
   task_definition                   = aws_ecs_task_definition.user_microservice.arn
   desired_count                     = 2
   launch_type                       = "FARGATE"
@@ -509,7 +362,7 @@ resource "aws_ecs_service" "user_microservice" {
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_load_balanced_backend_microservices.id]
+    security_groups  = [var.security_group_ids["ecs_load_balanced_backend_microservices"]]
   }
 
   load_balancer {
@@ -521,7 +374,7 @@ resource "aws_ecs_service" "user_microservice" {
 
 resource "aws_ecs_service" "group_microservice" {
   name                              = "group-ecs-svc-${local.name_suffix}"
-  cluster                           = aws_ecs_cluster.main.id
+  cluster                           = aws_ecs_cluster.fargate.id
   task_definition                   = aws_ecs_task_definition.group_microservice.arn
   desired_count                     = 2
   launch_type                       = "FARGATE"
@@ -531,7 +384,7 @@ resource "aws_ecs_service" "group_microservice" {
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_load_balanced_backend_microservices.id]
+    security_groups  = [var.security_group_ids["ecs_load_balanced_backend_microservices"]]
   }
 
   load_balancer {
@@ -543,7 +396,7 @@ resource "aws_ecs_service" "group_microservice" {
 
 resource "aws_ecs_service" "task_microservice" {
   name                              = "task-ecs-svc-${local.name_suffix}"
-  cluster                           = aws_ecs_cluster.main.id
+  cluster                           = aws_ecs_cluster.fargate.id
   task_definition                   = aws_ecs_task_definition.task_microservice.arn
   desired_count                     = 2
   launch_type                       = "FARGATE"
@@ -553,7 +406,7 @@ resource "aws_ecs_service" "task_microservice" {
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_load_balanced_backend_microservices.id]
+    security_groups  = [var.security_group_ids["ecs_load_balanced_backend_microservices"]]
   }
 
   load_balancer {
@@ -563,30 +416,30 @@ resource "aws_ecs_service" "task_microservice" {
   }
 }
 
-resource "aws_ecs_service" "progress_tracker_microservice" {
-  name                = "progress-tracker-ecs-svc-${local.name_suffix}"
-  cluster             = aws_ecs_cluster.main.id
-  task_definition     = aws_ecs_task_definition.progress_tracker_microservice.arn
-  desired_count       = 2
-  launch_type         = "FARGATE"
-  scheduling_strategy = "REPLICA"
-  # Health check grace period is only valid for services configured to use load balancers
+# resource "aws_ecs_service" "progress_tracker_microservice" {
+#   name                = "progress-tracker-ecs-svc-${local.name_suffix}"
+#   cluster             = aws_ecs_cluster.fargate.id
+#   task_definition     = aws_ecs_task_definition.progress_tracker_microservice.arn
+#   desired_count       = 2
+#   launch_type         = "FARGATE" # defaults to EC2
+#   scheduling_strategy = "REPLICA" # defaults to REPLICA
+#   # Health check grace period is only valid for services configured to use load balancers
 
-  network_configuration {
-    assign_public_ip = true
-    subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_progress_tracker_microservice.id]
-  }
+#   network_configuration {
+#     assign_public_ip = true
+#     subnets          = var.subnets
+#     security_groups  = [var.security_group_ids["ecs_progress_tracker_microservice"]]
+#   }
 
-  # service discovery
-  service_registries {
-    registry_arn = var.progress_tracker_discovery_service_registry_arn
-  }
-}
+#   # service discovery
+#   service_registries {
+#     registry_arn = var.progress_tracker_discovery_service_registry_arn
+#   }
+# }
 
 resource "aws_ecs_service" "mysql_db_microservice" {
   name                = "mysql-db-ecs-svc-${local.name_suffix}"
-  cluster             = aws_ecs_cluster.main.id
+  cluster             = aws_ecs_cluster.fargate.id
   task_definition     = aws_ecs_task_definition.mysql_db_microservice.arn
   desired_count       = 1
   launch_type         = "FARGATE"
@@ -597,7 +450,7 @@ resource "aws_ecs_service" "mysql_db_microservice" {
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_mysql_db_microservice.id]
+    security_groups  = [var.security_group_ids["ecs_mysql_db_microservice"]]
   }
 
   # service discovery
@@ -608,7 +461,7 @@ resource "aws_ecs_service" "mysql_db_microservice" {
 
 resource "aws_ecs_service" "front_end_microservice" {
   name                              = "front-end-ecs-svc-${local.name_suffix}"
-  cluster                           = aws_ecs_cluster.main.id
+  cluster                           = aws_ecs_cluster.fargate.id
   task_definition                   = aws_ecs_task_definition.front_end_microservice.arn
   desired_count                     = 2
   launch_type                       = "FARGATE"
@@ -618,7 +471,7 @@ resource "aws_ecs_service" "front_end_microservice" {
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets
-    security_groups  = [aws_security_group.ecs_load_balanced_frontend_microservices.id]
+    security_groups  = [var.security_group_ids["ecs_load_balanced_frontend_microservices"]]
   }
 
   load_balancer {

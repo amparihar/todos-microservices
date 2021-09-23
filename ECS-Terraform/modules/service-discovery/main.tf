@@ -1,5 +1,5 @@
 resource "aws_service_discovery_private_dns_namespace" "main" {
-  name = "${var.app_name}.${var.stage_name}.ecs.microservices.local"
+  name = "${var.app_name}.${var.stage_name}.ecs.microservices.pvt"
   vpc  = var.vpcid
 }
 

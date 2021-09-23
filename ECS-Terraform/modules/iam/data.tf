@@ -49,3 +49,15 @@ data "aws_iam_policy_document" "ecs_task_execution_role_assume_role_policy" {
     }
   }
 }
+
+// EC2 Instance Role
+data "aws_iam_policy_document" "ecs_ec2_instance_role_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
