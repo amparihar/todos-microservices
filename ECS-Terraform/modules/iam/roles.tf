@@ -41,3 +41,14 @@ resource "aws_iam_role_policy_attachment" "ecs_ec2_instance_role_policy_attachme
   role       = aws_iam_role.ecs_ec2_instance_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
+
+# ECS EC2 task autoscaling
+resource "aws_iam_role" "ecs_ec2_task_autoscaling_role" {
+  path               = "/"
+  assume_role_policy = data.aws_iam_policy_document.ecs_ec2_task_autoscaling_role_assume_role_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_ec2_task_autoscaling_role_policy_attachment" {
+  role       = aws_iam_role.ecs_ec2_task_autoscaling_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
+}

@@ -468,6 +468,10 @@ resource "aws_ecs_service" "front_end_microservice" {
   scheduling_strategy               = "REPLICA"
   health_check_grace_period_seconds = 147
 
+  # rolling update config for preprod
+  deployment_minimum_healthy_percent = 50
+  deployment_maximum_percent         = 100
+
   network_configuration {
     assign_public_ip = true
     subnets          = var.subnets

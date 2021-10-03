@@ -61,3 +61,15 @@ data "aws_iam_policy_document" "ecs_ec2_instance_role_assume_role_policy" {
     }
   }
 }
+
+# ECS EC2 task autoscaling 
+data "aws_iam_policy_document" "ecs_ec2_task_autoscaling_role_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["application-autoscaling.amazonaws.com"]
+    }
+  }
+}
