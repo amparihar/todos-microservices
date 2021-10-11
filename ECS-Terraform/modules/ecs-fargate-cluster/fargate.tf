@@ -468,9 +468,9 @@ resource "aws_ecs_service" "front_end_microservice" {
   scheduling_strategy               = "REPLICA"
   health_check_grace_period_seconds = 147
 
-  # rolling update config for preprod
+  # rolling update configuration
   deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 100
+  deployment_maximum_percent         = 150
 
   network_configuration {
     assign_public_ip = true
@@ -482,5 +482,15 @@ resource "aws_ecs_service" "front_end_microservice" {
     container_name   = "front-end-microservice-${local.name_suffix}"
     container_port   = var.container_ports["front_end_microservice"]
     target_group_arn = var.target_groups["front_end_microservice"]
+  }
+
+  deployment_controller {
+    type = var.enable_blue_green_deployment ? "CODE_DEPLOY" : "ECS"
+  }
+}
+
+output "service_names" {
+  value = {
+    "frontend_microservice" = aws_ecs_service.front_end_microservice.name
   }
 }

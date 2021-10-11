@@ -32,6 +32,12 @@ resource "aws_security_group" "alb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port   = 0
@@ -139,10 +145,34 @@ resource "aws_lb_target_group" "tg_front_end_microservice" {
   }
 }
 
+resource "aws_lb_target_group" "tg_green_front_end_microservice" {
+  count       = var.enable_blue_green_deployment ? 1 : 0
+  name        = substr("tg-green-front-end-ecs-svc-${local.name_suffix}", 0, min(32, length("tg-green-front-end-ecs-svc-${local.name_suffix}")))
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpcid
+
+  health_check {
+    healthy_threshold   = 3
+    unhealthy_threshold = 2
+    interval            = 30
+    timeout             = 10
+    protocol            = "HTTP"
+    matcher             = "200"
+    path                = var.target_group_health_check_path["front_end_microservice"]
+  }
+
+  tags = {
+    Name  = "tg-green-front-end-ecs-svc-${var.app_name}"
+    Stage = var.stage_name
+  }
+}
+
 # http listener with default action
 resource "aws_lb_listener" "microservice" {
   load_balancer_arn = aws_lb.main[0].arn
-  port              = "80"
+  port              = 80
   protocol          = "HTTP"
 
   default_action {
@@ -150,6 +180,23 @@ resource "aws_lb_listener" "microservice" {
     fixed_response {
       content_type = "text/plain"
       message_body = "The path you are looking for is unavaliable"
+      status_code  = "200"
+    }
+  }
+}
+
+# test/beta listener (green) deployment
+resource "aws_lb_listener" "microservice_green" {
+  count             = var.enable_blue_green_deployment ? 1 : 0
+  load_balancer_arn = aws_lb.main[0].arn
+  port              = 8080
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "The test path you are looking for is unavaliable"
       status_code  = "200"
     }
   }
@@ -217,8 +264,30 @@ resource "aws_lb_listener_rule" "front_end_microservice" {
   }
 }
 
+resource "aws_lb_listener_rule" "front_end_microservice_green" {
+  count        = var.enable_blue_green_deployment ? 1 : 0
+  listener_arn = aws_lb_listener.microservice_green[count.index].arn
+  priority     = 500
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg_green_front_end_microservice[count.index].arn
+  }
+  condition {
+    path_pattern {
+      values = var.listener_path_patterns["front_end_microservice"]
+    }
+  }
+}
+
 output "arn" {
   value = aws_lb.main.*.arn
+}
+
+output "listener_arns" {
+  value = {
+    "blue"  = aws_lb_listener.microservice.arn
+    "green" = var.enable_blue_green_deployment ? aws_lb_listener.microservice_green[0].arn : ""
+  }
 }
 
 output "dns_name" {
@@ -229,18 +298,22 @@ output "security_group_id" {
   value = aws_security_group.alb.id
 }
 
-output "user_microservice_target_group_arn" {
-  value = aws_lb_target_group.tg_user_microservice.arn
+output "target_group_arns" {
+  value = {
+    "user_microservice"            = aws_lb_target_group.tg_user_microservice.arn
+    "group_microservice"           = aws_lb_target_group.tg_group_microservice.arn
+    "task_microservice"            = aws_lb_target_group.tg_task_microservice.arn
+    "front_end_microservice"       = aws_lb_target_group.tg_front_end_microservice.arn
+    "front_end_microservice_green" = var.enable_blue_green_deployment ? aws_lb_target_group.tg_green_front_end_microservice[0].arn : ""
+  }
 }
 
-output "group_microservice_target_group_arn" {
-  value = aws_lb_target_group.tg_group_microservice.arn
-}
-
-output "task_microservice_target_group_arn" {
-  value = aws_lb_target_group.tg_task_microservice.arn
-}
-
-output "front_end_microservice_target_group_arn" {
-  value = aws_lb_target_group.tg_front_end_microservice.arn
+output "target_group_names" {
+  value = {
+    "user_microservice"            = aws_lb_target_group.tg_user_microservice.name
+    "group_microservice"           = aws_lb_target_group.tg_group_microservice.name
+    "task_microservice"            = aws_lb_target_group.tg_task_microservice.name
+    "front_end_microservice"       = aws_lb_target_group.tg_front_end_microservice.name
+    "front_end_microservice_green" = var.enable_blue_green_deployment ? aws_lb_target_group.tg_green_front_end_microservice[0].name : ""
+  }
 }

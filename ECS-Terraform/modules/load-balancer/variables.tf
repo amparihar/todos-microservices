@@ -32,3 +32,6 @@ variable "target_group_health_check_path" {
     "front_end_microservice" = "/index.html"
   }
 }
+variable "enable_blue_green_deployment" {
+  type = bool
+}

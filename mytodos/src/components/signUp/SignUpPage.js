@@ -58,7 +58,7 @@ const SignUp = ({ currentUser, requestUserSignUp, ...props }) => {
           <Typography color="textSecondary" gutterBottom>
             Already have an account. <Link to="/">Sign In</Link>
           </Typography>
-          <h3>Sign Up</h3>
+          <h3 style={{ color: 'blue' }}>Sign Up</h3>
           <form noValidate autoComplete="off" onSubmit={handleSignIn}>
             <div>
               <TextField

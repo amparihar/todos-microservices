@@ -25,11 +25,12 @@ output "public_subnet_ids" {
 # --------------------------------------------------------------
 
 module "alb" {
-  source     = "./modules/load-balancer"
-  app_name   = var.app_name
-  stage_name = var.stage_name
-  vpcid      = module.vpc.vpcid
-  subnets    = module.vpc.public_subnet_ids
+  source                       = "./modules/load-balancer"
+  app_name                     = var.app_name
+  stage_name                   = var.stage_name
+  vpcid                        = module.vpc.vpcid
+  subnets                      = module.vpc.public_subnet_ids
+  enable_blue_green_deployment = var.app_enable_blue_green_deployment
 }
 
 output "alb_arn" {
@@ -92,29 +93,25 @@ module "iam" {
 # ECS Fargate
 # --------------------------------------------------------------
 module "ecs_fargate" {
-  source                      = "./modules/ecs-fargate-cluster"
-  app_name                    = var.app_name
-  stage_name                  = var.stage_name
-  ecs_task_role_arn           = module.iam.ecs_task_role_arn
-  ecs_task_execution_role_arn = module.iam.ecs_task_execution_role_arn
-  regionid                    = var.aws_regions[var.aws_region]
-  ecs_fargate_cluster_name    = var.ecs_fargate_cluster_name
-  security_group_ids          = module.sg.security_group_ids
-  subnets                     = module.vpc.public_subnet_ids
-  alb_dns_name                = module.alb.dns_name[0]
-  container_ports             = var.app_container_ports
-  container_images            = var.app_container_images
-  target_groups = {
-    "user_microservice"      = module.alb.user_microservice_target_group_arn
-    "group_microservice"     = module.alb.group_microservice_target_group_arn
-    "task_microservice"      = module.alb.task_microservice_target_group_arn
-    "front_end_microservice" = module.alb.front_end_microservice_target_group_arn
-  }
+  source                                          = "./modules/ecs-fargate-cluster"
+  app_name                                        = var.app_name
+  stage_name                                      = var.stage_name
+  ecs_task_role_arn                               = module.iam.ecs_task_role_arn
+  ecs_task_execution_role_arn                     = module.iam.ecs_task_execution_role_arn
+  regionid                                        = var.aws_regions[var.aws_region]
+  ecs_fargate_cluster_name                        = var.ecs_fargate_cluster_name
+  security_group_ids                              = module.sg.security_group_ids
+  subnets                                         = module.vpc.public_subnet_ids
+  alb_dns_name                                    = module.alb.dns_name[0]
+  container_ports                                 = var.app_container_ports
+  container_images                                = var.app_container_images
+  target_groups                                   = module.alb.target_group_arns
   mysqldb_discovery_service_name                  = module.servicediscovery.mysqldb_discovery_service_name
   mysqldb_discovery_service_registry_arn          = module.servicediscovery.mysqldb_discovery_service_registry_arn
   progress_tracker_discovery_service_name         = module.servicediscovery.progress_tracker_discovery_service_name
   progress_tracker_discovery_service_registry_arn = module.servicediscovery.progress_tracker_discovery_service_registry_arn
   jwt_access_token                                = var.jwt_access_token
+  enable_blue_green_deployment                    = var.app_enable_blue_green_deployment
 }
 
 # --------------------------------------------------------------
@@ -136,4 +133,19 @@ module "ecs_ec2" {
   mysqldb_discovery_service_name                  = module.servicediscovery.mysqldb_discovery_service_name
   progress_tracker_discovery_service_registry_arn = module.servicediscovery.progress_tracker_discovery_service_registry_arn
   jwt_access_token                                = var.jwt_access_token
+}
+
+# --------------------------------------------------------------
+# CI/CD 
+# --------------------------------------------------------------
+
+module "deployment" {
+  source          = "./modules/deployment"
+  app_name        = var.app_name
+  stage_name      = var.stage_name
+  cluster_name    = var.ecs_fargate_cluster_name
+  service_names   = module.ecs_fargate.service_names
+  target_groups   = module.alb.target_group_names
+  listener_arns   = module.alb.listener_arns
+  container_ports = var.app_container_ports
 }

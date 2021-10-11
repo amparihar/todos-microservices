@@ -4,7 +4,7 @@ variable "app_name" {
 }
 variable "stage_name" {
   type    = string
-  default = "staging"
+  default = "nonprod"
 }
 
 variable "aws_region" {
@@ -14,8 +14,9 @@ variable "aws_region" {
 variable "aws_regions" {
   type = map(string)
   default = {
-    mumbai = "ap-south-1"
-    ohio   = "us-east-2"
+    mumbai        = "ap-south-1"
+    northvirginia = "us-east-1"
+    ohio          = "us-east-2"
   }
 }
 variable "ecs_fargate_cluster_name" {
@@ -62,4 +63,10 @@ variable "app_container_images" {
 
 variable "jwt_access_token" {
   type = string
+}
+
+variable "app_enable_blue_green_deployment" {
+  description = "Enable blue/ green deployment for the frontend microservice"
+  type        = bool
+  default     = true
 }

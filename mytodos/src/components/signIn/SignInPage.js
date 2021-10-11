@@ -43,7 +43,7 @@ const SignIn = ({ location, currentUser, requestUserSignIn, ...props }) => {
   return (
     <React.Fragment>
       {user.isAuthenticated && <Redirect to={referrer} />}
-      <h3>Sign In</h3>
+      <h3 style={{ color: 'blue' }}>Sign In</h3>
       {currentUser && currentUser.error && (
         <div style={{ marginBottom: '10px' }}>
           <Alert severity="error">

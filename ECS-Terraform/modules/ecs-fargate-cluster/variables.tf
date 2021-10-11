@@ -74,3 +74,6 @@ variable "jwt_access_token" {
 variable "container_images" {
   type = map(string)
 }
+variable "enable_blue_green_deployment" {
+  type = bool
+}
