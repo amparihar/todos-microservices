@@ -3,7 +3,7 @@ node_modules
 *.tfstate
 *.tfstate.*
 
-*.tfvars
+# *.tfvars
 
 #  Local .terraform directories
 **/.terraform/*
