@@ -10,15 +10,15 @@ variable "create_vpc" {
 }
 variable "vpc_cidr" {
   type    = string
-  default = "10.100.0.0/20"
+  default = "10.192.0.0/20"
 }
 variable "public_subnets" {
   type    = list(string)
-  default = ["10.100.0.0/24", "10.100.1.0/24"]
+  default = ["10.192.0.0/24", "10.192.1.0/24"]
 }
 variable "private_subnets" {
   type    = list(string)
-  default = ["10.100.2.0/24", "10.100.3.0/24"]
+  default = ["10.192.2.0/24", "10.192.3.0/24"]
 }
 
 variable "nat_gateways" {
