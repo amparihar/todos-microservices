@@ -1,6 +1,9 @@
 locals {
   azs        = data.aws_availability_zones.available.names
-  create_vpc = var.create_vpc && length(var.vpc_cidr) > 0 && length(var.public_subnets) > 0
+  create_vpc = var.create_vpc && length(var.vpc_cidr) > 0 && 
+                length(var.public_subnets) > 0 &&
+                length(var.private_subnets) > 0 &&
+                var.nat_gateways <= length(var.private_subnets)
 }
 
 resource "aws_vpc" "main" {
@@ -109,6 +112,10 @@ resource "aws_eip" "nat" {
   tags = {
     Name = "eip-${var.app_name}-${var.stage_name}-${count.index + 1}"
   }
+}
+
+output "avalability_zones" {
+  value = slice(local.azs,0,length(local.azs))
 }
 
 output "vpcid" {

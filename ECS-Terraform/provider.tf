@@ -12,6 +12,10 @@ module "vpc" {
 
 }
 
+output "avalability_zones" {
+  value = module.vpc.avalability_zones
+}
+
 output "vpcid" {
   value = [module.vpc.vpcid]
 }
