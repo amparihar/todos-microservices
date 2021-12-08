@@ -360,7 +360,7 @@ resource "aws_ecs_service" "user_microservice" {
   health_check_grace_period_seconds = 147
 
   network_configuration {
-    assign_public_ip = true
+    assign_public_ip = false
     subnets          = var.subnets
     security_groups  = [var.security_group_ids["ecs_load_balanced_backend_microservices"]]
   }
@@ -382,7 +382,7 @@ resource "aws_ecs_service" "group_microservice" {
   health_check_grace_period_seconds = 147
 
   network_configuration {
-    assign_public_ip = true
+    assign_public_ip = false
     subnets          = var.subnets
     security_groups  = [var.security_group_ids["ecs_load_balanced_backend_microservices"]]
   }
@@ -404,7 +404,7 @@ resource "aws_ecs_service" "task_microservice" {
   health_check_grace_period_seconds = 147
 
   network_configuration {
-    assign_public_ip = true
+    assign_public_ip = false
     subnets          = var.subnets
     security_groups  = [var.security_group_ids["ecs_load_balanced_backend_microservices"]]
   }
@@ -426,7 +426,7 @@ resource "aws_ecs_service" "task_microservice" {
 #   # Health check grace period is only valid for services configured to use load balancers
 
 #   network_configuration {
-#     assign_public_ip = true
+#     assign_public_ip = false
 #     subnets          = var.subnets
 #     security_groups  = [var.security_group_ids["ecs_progress_tracker_microservice"]]
 #   }
@@ -448,7 +448,7 @@ resource "aws_ecs_service" "mysql_db_microservice" {
   # Health check grace period is only valid for services configured to use load balancers
 
   network_configuration {
-    assign_public_ip = true
+    assign_public_ip = false
     subnets          = var.subnets
     security_groups  = [var.security_group_ids["ecs_mysql_db_microservice"]]
   }
@@ -473,7 +473,7 @@ resource "aws_ecs_service" "front_end_microservice" {
   deployment_maximum_percent         = 150
 
   network_configuration {
-    assign_public_ip = true
+    assign_public_ip = false
     subnets          = var.subnets
     security_groups  = [var.security_group_ids["ecs_load_balanced_frontend_microservices"]]
   }

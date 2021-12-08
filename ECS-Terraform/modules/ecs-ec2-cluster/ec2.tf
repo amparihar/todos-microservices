@@ -43,7 +43,7 @@ resource "aws_launch_configuration" "ecs_ec2_lc" {
   instance_type               = var.instance_type # default t2.small
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
   user_data                   = data.template_file.ecs_ec2_instance_user_data.rendered
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 }
 
 # launch template
@@ -59,7 +59,7 @@ resource "aws_launch_template" "ecs_ec2_lt" {
   user_data = data.template_file.ecs_ec2_instance_user_data.rendered
 
   network_interfaces {
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     security_groups             = [var.security_group_ids["ec2_instance"]]
   }
 }

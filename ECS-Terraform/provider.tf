@@ -20,6 +20,10 @@ output "public_subnet_ids" {
   value = module.vpc.public_subnet_ids
 }
 
+output "private_subnet_ids" {
+  value = module.vpc.private_subnet_ids
+}
+
 # --------------------------------------------------------------
 # ALB
 # --------------------------------------------------------------
@@ -101,7 +105,7 @@ module "ecs_fargate" {
   regionid                                        = var.aws_regions[var.aws_region]
   ecs_fargate_cluster_name                        = var.ecs_fargate_cluster_name
   security_group_ids                              = module.sg.security_group_ids
-  subnets                                         = module.vpc.public_subnet_ids
+  subnets                                         = module.vpc.private_subnet_ids
   alb_dns_name                                    = module.alb.dns_name[0]
   container_ports                                 = var.app_container_ports
   container_images                                = var.app_container_images
@@ -127,7 +131,7 @@ module "ecs_ec2" {
   ecs_ec2_cluster_name                            = var.ecs_ec2_cluster_name
   security_group_ids                              = module.sg.security_group_ids
   vpcid                                           = module.vpc.vpcid
-  subnets                                         = module.vpc.public_subnet_ids
+  subnets                                         = module.vpc.private_subnet_ids
   container_ports                                 = var.app_container_ports
   container_images                                = var.app_container_images
   mysqldb_discovery_service_name                  = module.servicediscovery.mysqldb_discovery_service_name
@@ -149,3 +153,4 @@ module "deployment" {
   listener_arns   = module.alb.listener_arns
   container_ports = var.app_container_ports
 }
+
