@@ -16,7 +16,7 @@ resource "aws_autoscaling_group" "ecs_ec2_asg" {
   vpc_zone_identifier  = var.subnets
   min_size             = var.min_instances    # default 1
   max_size             = var.max_instances    # default 3
-  desired_capacity     = var.desired_capacity # default 2
+  desired_capacity     = var.desired_capacity # default 1
   launch_configuration = aws_launch_configuration.ecs_ec2_lc[0].name
   # launch_template {
   #   name    = aws_launch_template.ecs_ec2_lt[0].name
@@ -40,7 +40,7 @@ resource "aws_launch_configuration" "ecs_ec2_lc" {
   name_prefix                 = "ecs-ec2-lc-${local.name_suffix}"
   security_groups             = [var.security_group_ids["ec2_instance"]]
   image_id                    = data.aws_ami.latest_ecs_ami.id
-  instance_type               = var.instance_type # default t2.small
+  instance_type               = var.instance_type # default t2.medium
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
   user_data                   = data.template_file.ecs_ec2_instance_user_data.rendered
   associate_public_ip_address = false
@@ -137,6 +137,7 @@ resource "aws_ecs_service" "progress_tracker_microservice" {
     field = "memory"
   }
 
+  # required only for 'awsvpc' network
   network_configuration {
     subnets         = var.subnets
     security_groups = [var.security_group_ids["ecs_progress_tracker_microservice"]]
@@ -145,8 +146,8 @@ resource "aws_ecs_service" "progress_tracker_microservice" {
   # service discovery
   service_registries {
     registry_arn = var.progress_tracker_discovery_service_registry_arn
-    # container_name and container_port required for 'host' & 'bridge' network
-    # container_name = "progress-tracker-microservice-${local.name_suffix}"
-    # container_port = var.container_ports["progress_tracker_microservice"]
+    #container_name and container_port required for 'host' & 'bridge' network
+    #container_name = "progress-tracker-microservice-${local.name_suffix}"
+    #container_port = var.container_ports["progress_tracker_microservice"]
   }
 }

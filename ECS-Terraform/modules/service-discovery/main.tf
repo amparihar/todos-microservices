@@ -1,5 +1,7 @@
+resource "random_uuid" "random" {}
+
 resource "aws_service_discovery_private_dns_namespace" "main" {
-  name = "${var.app_name}.${var.stage_name}.ecs.microservices.pvt"
+  name = "${var.app_name}.${var.stage_name}.ecs.microservices.pvt.${random_uuid.random.result}"
   vpc  = var.vpcid
 }
 
@@ -25,6 +27,8 @@ resource "aws_service_discovery_service" "progress_tracker_microservice" {
     dns_records {
       ttl  = 300
       type = "A"
+      # required for bridge & host n/w modes
+      #type = "SRV"
     }
     routing_policy = "MULTIVALUE"
   }

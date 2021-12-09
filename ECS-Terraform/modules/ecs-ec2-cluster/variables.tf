@@ -47,11 +47,11 @@ variable "min_instances" {
 }
 variable "desired_capacity" {
   type    = number
-  default = 2
+  default = 1
 }
 variable "instance_type" {
   type    = string
-  default = "t2.small"
+  default = "t2.medium"
 }
 variable "jwt_access_token" {
   type = string

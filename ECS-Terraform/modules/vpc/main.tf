@@ -1,6 +1,7 @@
 locals {
   azs        = data.aws_availability_zones.available.names
-  create_vpc = var.create_vpc && length(var.vpc_cidr) > 0 && length(var.public_subnets) > 0 && length(var.private_subnets) > 0 && var.nat_gateways <= length(var.private_subnets)
+  create_vpc = var.create_vpc && length(var.vpc_cidr) > 0 && length(var.public_subnets) > 0
+  create_private_subnets = local.create_vpc && length(var.private_subnets) > 0 && var.nat_gateways > 0 && (var.nat_gateways <= length(var.private_subnets))
 }
 
 resource "aws_vpc" "main" {
