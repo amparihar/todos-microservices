@@ -25,6 +25,9 @@ variable "vpcid" {
 variable "subnets" {
   type = list(string)
 }
+variable "assign_public_ip" {
+  type = bool
+}
 variable "container_ports" {
   type = map(number)
 }

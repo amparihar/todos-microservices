@@ -23,6 +23,6 @@ variable "private_subnets" {
 
 variable "nat_gateways" {
   type    = number
-  default = 1
-  description = "Number of NAT Gateways to be provisioned. This number cannot exceed the total number of Private Subnets in all AZs"
+  default = 0
+  description = "Number of NAT Gateways to be provisioned. This number cannot exceed the total number of Public Subnets in all AZs"
 }

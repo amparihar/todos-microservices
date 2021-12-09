@@ -109,7 +109,8 @@ module "ecs_fargate" {
   regionid                                        = var.aws_regions[var.aws_region]
   ecs_fargate_cluster_name                        = var.ecs_fargate_cluster_name
   security_group_ids                              = module.sg.security_group_ids
-  subnets                                         = module.vpc.private_subnet_ids
+  subnets                                         = length(module.vpc.private_subnet_ids) > 0 ? module.vpc.private_subnet_ids : module.vpc.public_subnet_ids
+  assign_public_ip                                = length(module.vpc.private_subnet_ids) > 0 ? false : true
   alb_dns_name                                    = module.alb.dns_name[0]
   container_ports                                 = var.app_container_ports
   container_images                                = var.app_container_images
@@ -135,7 +136,8 @@ module "ecs_ec2" {
   ecs_ec2_cluster_name                            = var.ecs_ec2_cluster_name
   security_group_ids                              = module.sg.security_group_ids
   vpcid                                           = module.vpc.vpcid
-  subnets                                         = module.vpc.private_subnet_ids
+  subnets                                         = length(module.vpc.private_subnet_ids) > 0 ? module.vpc.private_subnet_ids : module.vpc.public_subnet_ids
+  assign_public_ip                                = length(module.vpc.private_subnet_ids) > 0 ? false : true
   container_ports                                 = var.app_container_ports
   container_images                                = var.app_container_images
   mysqldb_discovery_service_name                  = module.servicediscovery.mysqldb_discovery_service_name

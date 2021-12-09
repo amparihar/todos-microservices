@@ -22,6 +22,9 @@ variable "security_group_ids" {
 variable "subnets" {
   type = list(string)
 }
+variable "assign_public_ip" {
+  type = bool
+}
 variable "alb_dns_name" {
   type = string
 }

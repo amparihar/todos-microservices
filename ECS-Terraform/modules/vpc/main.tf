@@ -1,7 +1,7 @@
 locals {
   azs        = data.aws_availability_zones.available.names
   create_vpc = var.create_vpc && length(var.vpc_cidr) > 0 && length(var.public_subnets) > 0
-  create_private_subnets = var.create_vpc && length(var.private_subnets) > 0 && var.nat_gateways > 0 && (var.nat_gateways <= length(var.private_subnets))
+  create_private_subnets = var.create_vpc && length(var.private_subnets) > 0 && var.nat_gateways > 0 && (var.nat_gateways <= length(var.public_subnets))
 }
 
 resource "aws_vpc" "main" {
@@ -125,5 +125,5 @@ output "public_subnet_ids" {
 }
 
 output "private_subnet_ids" {
-  value = aws_subnet.private.*.id
+  value = local.create_private_subnets ? aws_subnet.private.*.id : []
 }

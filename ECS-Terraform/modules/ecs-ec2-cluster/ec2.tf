@@ -32,6 +32,9 @@ resource "aws_autoscaling_group" "ecs_ec2_asg" {
     value               = "${var.app_name}-${var.stage_name}-${var.ecs_ec2_cluster_name}"
     propagate_at_launch = true
   }
+  depends_on = [
+    aws_launch_configuration.ecs_ec2_lc
+  ]
 }
 
 # launch configuration
@@ -43,7 +46,7 @@ resource "aws_launch_configuration" "ecs_ec2_lc" {
   instance_type               = var.instance_type # default t2.medium
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
   user_data                   = data.template_file.ecs_ec2_instance_user_data.rendered
-  associate_public_ip_address = false
+  associate_public_ip_address = var.assign_public_ip
 }
 
 # launch template
@@ -59,7 +62,7 @@ resource "aws_launch_template" "ecs_ec2_lt" {
   user_data = data.template_file.ecs_ec2_instance_user_data.rendered
 
   network_interfaces {
-    associate_public_ip_address = false
+    associate_public_ip_address = var.assign_public_ip
     security_groups             = [var.security_group_ids["ec2_instance"]]
   }
 }
