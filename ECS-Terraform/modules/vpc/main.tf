@@ -1,7 +1,7 @@
 locals {
   azs        = data.aws_availability_zones.available.names
   create_vpc = var.create_vpc && length(var.vpc_cidr) > 0 && length(var.public_subnets) > 0
-  create_private_subnets = local.create_vpc && length(var.private_subnets) > 0 && var.nat_gateways > 0 && (var.nat_gateways <= length(var.private_subnets))
+  create_private_subnets = var.create_vpc && length(var.private_subnets) > 0 && var.nat_gateways > 0 && (var.nat_gateways <= length(var.private_subnets))
 }
 
 resource "aws_vpc" "main" {
@@ -60,7 +60,7 @@ resource "aws_route_table_association" "public" {
 # private subnets
 
 resource "aws_subnet" "private" {
-  count             = local.create_vpc ? length(slice(local.azs, 0, 2)) : 0
+  count             = local.create_private_subnets ? length(slice(local.azs, 0, 2)) : 0
   vpc_id            = element(aws_vpc.main.*.id, 0)
   availability_zone = element(local.azs, count.index)
   cidr_block        = element(var.private_subnets, count.index)
@@ -72,12 +72,12 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_route_table" "private" {
-  count  = local.create_vpc ? length(var.private_subnets) : 0
+  count  = local.create_private_subnets ? length(var.private_subnets) : 0
   vpc_id = aws_vpc.main[0].id
 }
 
 resource "aws_route" "private" {
-  count                  = local.create_vpc ? length(var.private_subnets) : 0
+  count                  = local.create_private_subnets ? length(var.private_subnets) : 0
   route_table_id         = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = element(aws_nat_gateway.main.*.id, count.index)
@@ -87,14 +87,14 @@ resource "aws_route" "private" {
 }
 
 resource "aws_route_table_association" "private" {
-  count          = local.create_vpc ? length(var.private_subnets) : 0
+  count          = local.create_private_subnets ? length(var.private_subnets) : 0
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }
 
 #NAT G/W
 resource "aws_nat_gateway" "main" {
-  count         = local.create_vpc ? var.nat_gateways : 0
+  count         = local.create_private_subnets ? var.nat_gateways : 0
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
 
@@ -104,7 +104,7 @@ resource "aws_nat_gateway" "main" {
 }
 
 resource "aws_eip" "nat" {
-  count      = local.create_vpc ? var.nat_gateways : 0
+  count      = local.create_private_subnets ? var.nat_gateways : 0
   vpc        = true
   depends_on = [aws_internet_gateway.main]
   tags = {
