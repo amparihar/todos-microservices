@@ -16,7 +16,7 @@ resource "aws_autoscaling_group" "ecs_ec2_asg" {
   vpc_zone_identifier  = var.subnets
   min_size             = var.min_instances    # default 1
   max_size             = var.max_instances    # default 3
-  desired_capacity     = var.desired_capacity # default 1
+  desired_capacity     = var.desired_capacity # default 2
   launch_configuration = aws_launch_configuration.ecs_ec2_lc[0].name
   # launch_template {
   #   name    = aws_launch_template.ecs_ec2_lt[0].name
@@ -153,4 +153,30 @@ resource "aws_ecs_service" "progress_tracker_microservice" {
     #container_name = "progress-tracker-microservice-${local.name_suffix}"
     #container_port = var.container_ports["progress_tracker_microservice"]
   }
+}
+
+# ECS Task Autoscaling
+resource "aws_appautoscaling_target" "progress_tracker_microservice" {
+  max_capacity       = 3
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.ec2.name}/${aws_ecs_service.progress_tracker_microservice.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+  role_arn           = var.ecs_ec2_task_autoscaling_role_arn
+}
+
+resource "aws_appautoscaling_policy" "progress_tracker_microservice_target_cpu" {
+  name               = "progress_tracker_microservice-scaling-policy-cpu-${local.name_suffix}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.progress_tracker_microservice.resource_id
+  scalable_dimension = aws_appautoscaling_target.progress_tracker_microservice.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.progress_tracker_microservice.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value = 20
+  }
+  depends_on = [aws_appautoscaling_target.progress_tracker_microservice]
 }

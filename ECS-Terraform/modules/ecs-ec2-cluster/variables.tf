@@ -10,6 +10,9 @@ variable "ecs_task_execution_role_arn" {
 variable "ecs_ec2_instance_role_name" {
   type = string
 }
+variable "ecs_ec2_task_autoscaling_role_arn" {
+  type = string
+}
 variable "regionid" {
   type = string
 }

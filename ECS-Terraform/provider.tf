@@ -132,6 +132,7 @@ module "ecs_ec2" {
   stage_name                                      = var.stage_name
   ecs_task_execution_role_arn                     = module.iam.ecs_task_execution_role_arn
   ecs_ec2_instance_role_name                      = module.iam.ecs_ec2_instance_role_name
+  ecs_ec2_task_autoscaling_role_arn               = module.iam.ecs_ec2_task_autoscaling_role_arn
   regionid                                        = var.aws_regions[var.aws_region]
   ecs_ec2_cluster_name                            = var.ecs_ec2_cluster_name
   security_group_ids                              = module.sg.security_group_ids
