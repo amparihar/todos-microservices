@@ -3,10 +3,29 @@ var mysqlService = require("../services/mysqlsvc"),
   env = require("../../envConfig");
 
 const axios = require("axios");
+const prometheus = require("prom-client");
+
+const register = new prometheus.Registry();
+// Add a default label which is added to all metrics
+register.setDefaultLabels({
+  app: 'group-microsvc'
+});
+// Enable the collection of default metrics
+//prometheus.collectDefaultMetrics({ register });
+const list_api_requests = new prometheus.Counter({
+  name : "group_list_api_request_count",
+  help: "group_list_api_request_count"
+});
+register.registerMetric(list_api_requests);
 
 var healthCheck = async (req, res, next) => {
   utils.handleSuccessResponse(res, "Group Service health check succeeded.");
 };
+
+var metrics = async (req, res, next) => {
+  res.status(200).set('Content-Type', 'text/plain');
+  res.end(await register.metrics());
+}
 
 var getProgress = async (authToken) => {
   try {
@@ -30,6 +49,7 @@ var getProgress = async (authToken) => {
 };
 
 var list = async (req, res, next) => {
+  list_api_requests.inc();
   var { uid } = req.accessToken;
   mysqlService.lazyConnect((err, connection, release) => {
     if (err) {
@@ -105,6 +125,7 @@ var save = async (req, res, next) => {
 
 const groupRepo = {
   healthCheck,
+  metrics,
   list,
   save,
 };

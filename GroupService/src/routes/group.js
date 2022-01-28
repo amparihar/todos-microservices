@@ -44,6 +44,8 @@ async function validateSaveGroupSchema(req, res, next) {
 
 var routes = function (app, handlerfn) {
   app.route("/api/group/health-check").get(handlerfn, groupRepo.healthCheck);
+  
+  app.route("/api/group/metrics").get(handlerfn, groupRepo.metrics);
 
   app
     .route("/api/group/list")
