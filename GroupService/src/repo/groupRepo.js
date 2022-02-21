@@ -19,8 +19,15 @@ const list_api_requests = new prometheus.Counter({
 register.registerMetric(list_api_requests);
 
 var healthCheck = async (req, res, next) => {
+  await sleep(env.HEALTH_CHECK_SLEEP_DURATION_MS || 0);
   utils.handleSuccessResponse(res, "Group Service health check succeeded.");
 };
+
+var sleep = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, parseInt(ms));
+  });
+}
 
 var metrics = async (req, res, next) => {
   res.status(200).set('Content-Type', 'text/plain');

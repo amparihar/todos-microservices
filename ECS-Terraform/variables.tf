@@ -52,10 +52,10 @@ variable "app_container_ports" {
 variable "app_container_images" {
   type = map(string)
   default = {
-    user_microservice             = "aparihar/todos-user-microsvc-v2:latest"
-    group_microservice            = "aparihar/todos-group-microsvc-v2:latest"
-    task_microservice             = "aparihar/todos-task-microsvc-v2:latest"
-    progress_tracker_microservice = "aparihar/todos-progress-tracker-microsvc-v2:latest"
+    user_microservice             = "aparihar/todos-user-microsvc:3.0"
+    group_microservice            = "aparihar/todos-group-microsvc:4.0"
+    task_microservice             = "aparihar/todos-task-microsvc:3.0"
+    progress_tracker_microservice = "aparihar/todos-progress-tracker-microsvc:3.0"
     mysql_db_microservice         = "aparihar/todos-mysql-db-microsvc:latest"
     front_end_microservice        = "aparihar/todos-mytodos-microsvc-v2:latest"
   }
