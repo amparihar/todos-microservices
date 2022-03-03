@@ -27,12 +27,12 @@ var sleep = (ms) => {
   return new Promise((resolve) => {
     setTimeout(resolve, parseInt(ms));
   });
-}
+};
 
 var metrics = async (req, res, next) => {
   res.status(200).set('Content-Type', 'text/plain');
   res.end(await register.metrics());
-}
+};
 
 var getProgress = async (authToken) => {
   try {
@@ -57,6 +57,7 @@ var getProgress = async (authToken) => {
 
 var list = async (req, res, next) => {
   list_api_requests.inc();
+  await sleep(env.LIST_GROUPS_SLEEP_DURATION_MS || 0);
   var { uid } = req.accessToken;
   mysqlService.lazyConnect((err, connection, release) => {
     if (err) {

@@ -1,5 +1,12 @@
 var mysqlService = require("../services/mysqlsvc"),
-  utils = require("../utils");
+  utils = require("../utils"),
+  env = require("../../envConfig");
+  
+var sleep = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, parseInt(ms));
+  });
+};
 
 var healthCheck = async (req, res, next) => {
   utils.handleSuccessResponse(
@@ -9,6 +16,7 @@ var healthCheck = async (req, res, next) => {
 };
 
 var groups = async (req, res, next) => {
+  await sleep(env.PROGRESS_GROUPS_SLEEP_DURATION_MS || 0);
   var { uid } = req.accessToken;
   mysqlService.lazyConnect((err, connection, release) => {
     if (err) {
