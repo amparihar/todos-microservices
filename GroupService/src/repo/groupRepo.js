@@ -57,7 +57,7 @@ var getProgress = async (authToken) => {
 
 var list = async (req, res, next) => {
   list_api_requests.inc();
-  await sleep(env.LIST_GROUPS_SLEEP_DURATION_MS || 0);
+  
   var { uid } = req.accessToken;
   mysqlService.lazyConnect((err, connection, release) => {
     if (err) {
@@ -86,6 +86,7 @@ var list = async (req, res, next) => {
             progresspercent: match ? match.progresspercent : 0,
           };
         });
+        await sleep(env.LIST_GROUPS_SLEEP_DURATION_MS || 0);
         utils.handleSuccessResponse(res, apiResponse);
       });
     }
