@@ -57,6 +57,9 @@ var routes = function (app, handlerfn) {
       [handlerfn, authorizationFn, validateSaveGroupSchema],
       groupRepo.save
     );
+    
+    // test with delay/ timeout
+    app.route("/api/group/nap").get(handlerfn, groupRepo.nap);
 };
 
 module.exports = routes;

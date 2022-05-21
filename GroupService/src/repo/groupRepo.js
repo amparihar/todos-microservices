@@ -23,6 +23,12 @@ var healthCheck = async (req, res, next) => {
   utils.handleSuccessResponse(res, "Group Service health check succeeded.");
 };
 
+var nap = async (req, res, next) => {
+  let ms = req.query.ms;
+  await sleep(ms || 0);
+  utils.handleSuccessResponse(res, "Slept successfull for " + ms + " ms");
+};
+
 var sleep = (ms) => {
   return new Promise((resolve) => {
     setTimeout(resolve, parseInt(ms));
@@ -137,6 +143,7 @@ const groupRepo = {
   metrics,
   list,
   save,
+  nap
 };
 
 module.exports = groupRepo;
