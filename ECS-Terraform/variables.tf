@@ -53,7 +53,7 @@ variable "app_container_images" {
   type = map(string)
   default = {
     user_microservice             = "aparihar/todos-user-microsvc:3.0"
-    group_microservice            = "aparihar/todos-group-microsvc:4.0"
+    group_microservice            = "aparihar/todos-group-microsvc:4.4"
     task_microservice             = "aparihar/todos-task-microsvc:3.0"
     progress_tracker_microservice = "aparihar/todos-progress-tracker-microsvc:3.0"
     mysql_db_microservice         = "aparihar/todos-mysql-db-microsvc:latest"
