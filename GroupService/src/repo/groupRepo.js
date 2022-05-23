@@ -13,7 +13,7 @@ register.setDefaultLabels({
 // Enable the collection of default metrics
 //prometheus.collectDefaultMetrics({ register });
 const list_api_requests = new prometheus.Counter({
-  name : "group_list_api_request_count",
+  name: "group_list_api_request_count",
   help: "group_list_api_request_count"
 });
 register.registerMetric(list_api_requests);
@@ -42,16 +42,26 @@ var metrics = async (req, res, next) => {
 
 var getProgress = async (authToken) => {
   try {
-    const url =
-      "http://" +
-      env.PROGRESS_TRACKER_API_HOST +
-      ":" +
-      env.PROGRESS_TRACKER_API_PORT +
-      "/api/progress/groups";
+    var url;
+    if (env.PROGRESS_TRACKER_API_PORT === "") {
+      url =
+        "http://" +
+        env.PROGRESS_TRACKER_API_HOST +
+        "/api/progress/groups";
+    }
+    else {
+      url =
+        "http://" +
+        env.PROGRESS_TRACKER_API_HOST +
+        ":" +
+        env.PROGRESS_TRACKER_API_PORT +
+        "/api/progress/groups";
+    }
     const headers = { Authorization: authToken };
     const progressResponse = await axios.get(url, { headers });
     return { status: progressResponse.status, data: progressResponse.data };
-  } catch (error) {
+  }
+  catch (error) {
     console.log("getProgress error ", error);
     return {
       status: 500,
@@ -63,15 +73,16 @@ var getProgress = async (authToken) => {
 
 var list = async (req, res, next) => {
   list_api_requests.inc();
-  
+
   var { uid } = req.accessToken;
   mysqlService.lazyConnect((err, connection, release) => {
     if (err) {
       //res.status(500).send({ message: err.friendlyMessage });
       res.status(500).send(err);
-    } else {
+    }
+    else {
       var query = "SELECT id, name, ownerId from `group` where ownerId = ?";
-      connection.query(query, [uid], async function (err, groupList, fields) {
+      connection.query(query, [uid], async function(err, groupList, fields) {
         release();
         if (err) {
           return next({
@@ -107,13 +118,14 @@ var save = async (req, res, next) => {
     if (err) {
       //res.status(500).send({ message: err.friendlyMessage });
       res.status(500).send(err);
-    } else {
+    }
+    else {
       try {
         var query = "CALL sp_savegroup(?,?,?)";
         connection.query(
           query,
           [id, name, uid],
-          function (err, result, fields) {
+          function(err, result, fields) {
             release();
             if (err) {
               return next({
@@ -128,7 +140,8 @@ var save = async (req, res, next) => {
             });
           }
         );
-      } catch (err) {
+      }
+      catch (err) {
         next({
           ...err,
           friendlyMessage: utils.apiFriendlyMessages.SAVE,

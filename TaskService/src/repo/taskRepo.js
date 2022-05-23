@@ -10,17 +10,29 @@ var healthCheck = async (req, res, next) => {
 
 var getProgress = async (authToken, groupId) => {
   try {
-    const url =
-      "http://" +
-      env.PROGRESS_TRACKER_API_HOST +
-      ":" +
-      env.PROGRESS_TRACKER_API_PORT +
-      "/api/progress/group/" +
-      groupId;
+    var url;
+    if (env.PROGRESS_TRACKER_API_PORT === "") {
+      url =
+        "http://" +
+        env.PROGRESS_TRACKER_API_HOST +
+        "/api/progress/group" +
+        groupId;
+    }
+    else {
+      url =
+        "http://" +
+        env.PROGRESS_TRACKER_API_HOST +
+        ":" +
+        env.PROGRESS_TRACKER_API_PORT +
+        "/api/progress/groups" +
+        groupId;
+    }
+
     const headers = { Authorization: authToken };
     const progressResponse = await axios.get(url, { headers });
     return { status: progressResponse.status, data: progressResponse.data };
-  } catch (error) {
+  }
+  catch (error) {
     console.log("getProgress error ", error);
     return {
       status: 500,
@@ -36,10 +48,11 @@ var list = async (req, res, next) => {
     if (err) {
       //res.status(500).send({ message: err.friendlyMessage });
       res.status(500).send(err);
-    } else {
+    }
+    else {
       var query =
         "SELECT id, name, groupId, ownerId, isCompleted from task where ownerId = ? ORDER BY isCompleted ASC";
-      connection.query(query, [uid], function (err, result, fields) {
+      connection.query(query, [uid], function(err, result, fields) {
         release();
         if (err) {
           return next({
@@ -59,13 +72,14 @@ var save = async (req, res, next) => {
   mysqlService.lazyConnect((err, connection, release) => {
     if (err) {
       res.status(500).send(err);
-    } else {
+    }
+    else {
       try {
         var query = "CALL sp_savetask(?,?,?,?,?)";
         connection.query(
           query,
           [id, name, groupId, uid, isCompleted],
-          async function (err, result, fields) {
+          async function(err, result, fields) {
             release();
             if (err) {
               return next({
@@ -90,7 +104,8 @@ var save = async (req, res, next) => {
             utils.handleResponse(res, 201, apiResponse);
           }
         );
-      } catch (err) {
+      }
+      catch (err) {
         next({
           ...err,
           friendlyMessage: utils.apiFriendlyMessages.SAVE,
