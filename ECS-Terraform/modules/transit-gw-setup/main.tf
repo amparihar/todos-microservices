@@ -26,10 +26,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "todos" {
   transit_gateway_default_route_table_propagation = false
   
   tags = {
-      Name = format("tgwattapp-%s-%s",var.app_name,var.stage_name)
+      Name = format("tgw-att-todos-%s-%s",var.app_name,var.stage_name)
   }
-  
-  depends_on = ["aws_ec2_transit_gateway.main"]
 }
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "egress" {
@@ -42,24 +40,22 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "egress" {
   transit_gateway_default_route_table_propagation = false
   
   tags = {
-      Name = format("tgwattegress-%s-%s",var.app_name,var.stage_name)
+      Name = format("tgw-att-egress-%s-%s",var.app_name,var.stage_name)
   }
-  
-  depends_on = ["aws_ec2_transit_gateway.main"]
 }
 
 resource "aws_ec2_transit_gateway_route_table" "todos" {
   transit_gateway_id = var.transit_gateway_id
   
   tags = {
-      Name = format("tgw-todos-rt-%s-%s",var.app_name,var.stage_name)
+      Name = format("tgw-rt-todos-%s-%s",var.app_name,var.stage_name)
   }
 }
 
 resource "aws_ec2_transit_gateway_route_table" "egress" {
   transit_gateway_id = var.transit_gateway_id
   tags = {
-      Name = format("tgw-egress-rt-%s-%s",var.app_name,var.stage_name)
+      Name = format("tgw-rt-egress-%s-%s",var.app_name,var.stage_name)
   }
 }
 

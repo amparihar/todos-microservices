@@ -68,5 +68,5 @@ variable "jwt_access_token" {
 variable "app_enable_blue_green_deployment" {
   description = "Enable blue/ green deployment for the frontend microservice"
   type        = bool
-  default     = true
+  default     = false
 }

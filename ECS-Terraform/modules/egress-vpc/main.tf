@@ -12,7 +12,7 @@ resource "aws_vpc" "egress" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-${var.app_name}-${var.stage_name}-${count.index + 1}"
+    Name = "vpc-egress-${var.app_name}-${var.stage_name}-${count.index + 1}"
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "public-subnet-${var.app_name}-${var.stage_name}-${local.azs[count.index]}-${count.index + 1}"
+    Name = "public-subnet-egress-${var.app_name}-${var.stage_name}-${local.azs[count.index]}-${count.index + 1}"
     Tier = "Public"
   }
 }
@@ -52,10 +52,10 @@ resource "aws_route" "public_default" {
 }
 
 resource "aws_route" "public_todos" {
-  count                  = local.create_vpc ? 1 : 0
-  route_table_id         = element(aws_route_table.public.*.id, count.index)
-  destination_cidr_block = "10.100.0.0/20"
-  gateway_id             = var.transit_gateway_id
+  count                   = local.create_vpc ? 1 : 0
+  route_table_id          = element(aws_route_table.public.*.id, count.index)
+  destination_cidr_block  = "10.100.0.0/20"
+  transit_gateway_id      = var.transit_gateway_id
 }
 
 resource "aws_route_table_association" "public" {
@@ -73,7 +73,7 @@ resource "aws_subnet" "private" {
   cidr_block        = element(var.private_subnets, count.index)
 
   tags = {
-    Name = "private-subnet-${var.app_name}-${var.stage_name}-${local.azs[count.index]}-${count.index + 1}"
+    Name = "private-subnet-egress-${var.app_name}-${var.stage_name}-${local.azs[count.index]}-${count.index + 1}"
     Tier = "Private"
   }
 }
