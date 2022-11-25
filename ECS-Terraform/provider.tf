@@ -14,6 +14,13 @@ module "transit_gateway_create" {
 # --------------------------------------------------------------
 # VPC
 # --------------------------------------------------------------
+module "ingress_vpc" {
+  source              = "./modules/ingress-vpc"
+  app_name            = var.app_name
+  stage_name          = var.stage_name
+  transit_gateway_id  = module.transit_gateway_create.transit_gateway_id
+}
+
 module "egress_vpc" {
   source              = "./modules/egress-vpc"
   app_name            = var.app_name
