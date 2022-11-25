@@ -4,3 +4,29 @@ variable "app_name" {
 variable "stage_name" {
   type = string
 }
+variable "create_vpc" {
+  type    = bool
+  default = true
+}
+variable "vpc_cidr" {
+  type    = string
+  default = "10.100.0.0/20"
+}
+variable "public_subnets" {
+  type    = list(string)
+  default = ["10.100.0.0/24", "10.100.1.0/24"]
+}
+variable "private_subnets" {
+  type    = list(string)
+  default = ["10.100.2.0/24", "10.100.3.0/24"]
+}
+
+variable "nat_gateways" {
+  type    = number
+  default = 1
+  description = "Number of NAT Gateways to be provisioned. This number cannot exceed the total number of Public Subnets in all AZs"
+}
+
+variable "transit_gateway_id" {
+  type = string
+}

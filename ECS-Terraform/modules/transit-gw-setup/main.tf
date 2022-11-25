@@ -90,7 +90,7 @@ resource "aws_ec2_transit_gateway_route" "todos" {
 }
 
 resource "aws_ec2_transit_gateway_route" "egress" {
-  destination_cidr_block         = "10.192.0.0/20"
+  destination_cidr_block         = "10.100.0.0/20"
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.todos.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.egress.id
 }

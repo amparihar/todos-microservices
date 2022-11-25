@@ -26,3 +26,7 @@ variable "nat_gateways" {
   default = 1
   description = "Number of NAT Gateways to be provisioned. This number cannot exceed the total number of Public Subnets in all AZs"
 }
+
+variable "transit_gateway_id" {
+  type = string
+}

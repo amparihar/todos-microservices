@@ -4,7 +4,7 @@ locals {
   create_private_subnets = var.create_vpc && length(var.private_subnets) > 0 && var.nat_gateways > 0 && (var.nat_gateways <= length(var.public_subnets))
 }
 
-resource "aws_vpc" "main" {
+resource "aws_vpc" "egress" {
   count      = local.create_vpc ? 1 : 0
   cidr_block = var.vpc_cidr
   # dns settings are required to enable private hosted zone in VPC(i.e service discovery)
@@ -19,7 +19,7 @@ resource "aws_vpc" "main" {
 # One public subnet in each of the 2 AZs
 resource "aws_subnet" "public" {
   count                   = local.create_vpc ? length(slice(local.azs, 0, 2)) : 0
-  vpc_id                  = element(aws_vpc.main.*.id, 0)
+  vpc_id                  = element(aws_vpc.egress.*.id, 0)
   availability_zone       = element(local.azs, count.index)
   cidr_block              = element(var.public_subnets, count.index)
   map_public_ip_on_launch = true
@@ -30,9 +30,9 @@ resource "aws_subnet" "public" {
   }
 }
 
-resource "aws_internet_gateway" "main" {
+resource "aws_internet_gateway" "egress" {
   count  = local.create_vpc ? 1 : 0
-  vpc_id = aws_vpc.main[0].id
+  vpc_id = aws_vpc.egress[0].id
 
   tags = {
     Name = "igw-${var.app_name}-${var.stage_name}-${count.index + 1}"
@@ -41,14 +41,21 @@ resource "aws_internet_gateway" "main" {
 
 resource "aws_route_table" "public" {
   count  = local.create_vpc ? 1 : 0
-  vpc_id = element(aws_vpc.main.*.id, 0)
+  vpc_id = element(aws_vpc.egress.*.id, 0)
 }
 
-resource "aws_route" "public" {
+resource "aws_route" "public_default" {
   count                  = local.create_vpc ? 1 : 0
   route_table_id         = element(aws_route_table.public.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = element(aws_internet_gateway.main.*.id, count.index)
+  gateway_id             = element(aws_internet_gateway.egress.*.id, count.index)
+}
+
+resource "aws_route" "public_todos" {
+  count                  = local.create_vpc ? 1 : 0
+  route_table_id         = element(aws_route_table.public.*.id, count.index)
+  destination_cidr_block = "10.100.0.0/20"
+  gateway_id             = var.transit_gateway_id
 }
 
 resource "aws_route_table_association" "public" {
@@ -61,7 +68,7 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_subnet" "private" {
   count             = local.create_private_subnets ? length(slice(local.azs, 0, 2)) : 0
-  vpc_id            = element(aws_vpc.main.*.id, 0)
+  vpc_id            = element(aws_vpc.egress.*.id, 0)
   availability_zone = element(local.azs, count.index)
   cidr_block        = element(var.private_subnets, count.index)
 
@@ -73,16 +80,16 @@ resource "aws_subnet" "private" {
 
 resource "aws_route_table" "private" {
   count  = local.create_private_subnets ? length(var.private_subnets) : 0
-  vpc_id = aws_vpc.main[0].id
+  vpc_id = aws_vpc.egress[0].id
 }
 
 resource "aws_route" "private" {
   count                  = local.create_private_subnets ? length(var.private_subnets) : 0
   route_table_id         = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = element(aws_nat_gateway.main.*.id, count.index)
+  nat_gateway_id         = element(aws_nat_gateway.egress.*.id, count.index)
   depends_on = [
-    aws_nat_gateway.main
+    aws_nat_gateway.egress
   ]
 }
 
@@ -93,7 +100,7 @@ resource "aws_route_table_association" "private" {
 }
 
 #NAT G/W
-resource "aws_nat_gateway" "main" {
+resource "aws_nat_gateway" "egress" {
   count         = local.create_private_subnets ? var.nat_gateways : 0
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
@@ -106,7 +113,7 @@ resource "aws_nat_gateway" "main" {
 resource "aws_eip" "nat" {
   count      = local.create_private_subnets ? var.nat_gateways : 0
   vpc        = true
-  depends_on = [aws_internet_gateway.main]
+  depends_on = [aws_internet_gateway.egress]
   tags = {
     Name = "eip-${var.app_name}-${var.stage_name}-${count.index + 1}"
   }
@@ -117,7 +124,7 @@ output "avalability_zones" {
 }
 
 output "vpcid" {
-  value = element(aws_vpc.main.*.id, 0)
+  value = element(aws_vpc.egress.*.id, 0)
 }
 
 output "public_subnet_ids" {
