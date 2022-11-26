@@ -30,6 +30,15 @@ resource "aws_subnet" "public" {
   }
 }
 
+resource "aws_internet_gateway" "main" {
+  count  = local.create_vpc ? 1 : 0
+  vpc_id = aws_vpc.main[0].id
+
+  tags = {
+    Name = "igw-todos-${var.app_name}-${var.stage_name}-${count.index + 1}"
+  }
+}
+
 
 resource "aws_route_table" "public" {
   count  = local.create_vpc ? 1 : 0
@@ -40,7 +49,7 @@ resource "aws_route" "public" {
   count                   = local.create_vpc ? 1 : 0
   route_table_id          = element(aws_route_table.public.*.id, count.index)
   destination_cidr_block  = "0.0.0.0/0"
-  transit_gateway_id      = var.transit_gateway_id
+  gateway_id              = element(aws_internet_gateway.main.*.id, count.index)
 }
 
 resource "aws_route_table_association" "public" {
