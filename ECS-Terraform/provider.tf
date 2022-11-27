@@ -24,22 +24,6 @@ module "egress_vpc" {
 
 }
 
-# output "avalability_zones" {
-#   value = module.egress_vpc.avalability_zones
-# }
-
-# output "vpcid" {
-#   value = [module.egress_vpc.vpcid]
-# }
-
-# output "public_subnet_ids" {
-#   value = module.egress_vpc.public_subnet_ids
-# }
-
-# output "private_subnet_ids" {
-#   value = module.egress_vpc.private_subnet_ids
-# }
-
 module "todos_vpc" {
   source     = "./modules/todos-vpc"
   app_name   = var.app_name
