@@ -75,6 +75,20 @@ resource "aws_subnet" "private" {
 resource "aws_route_table" "private" {
   count  = local.create_private_subnets ? length(var.private_subnets) : 0
   vpc_id = aws_vpc.main[0].id
+  
+    # default
+  route {
+      cidr_block    = "0.0.0.0/0"
+      transit_gateway_id    = var.transit_gateway_id
+  }
+  
+  dynamic "route" {
+      for_each = ["10.190.0.0/20"]
+      content {
+          cidr_block            = route.value
+          transit_gateway_id    = var.transit_gateway_id
+      }
+  }
 }
 
 resource "aws_route" "private" {

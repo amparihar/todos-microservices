@@ -17,6 +17,14 @@ variable "todos_vpcid" {
   type = string
 }
 
+variable "ingress_subnets" {
+  type = list(string)
+}
+
+variable "ingress_vpcid" {
+  type = string
+}
+
 variable "egress_subnets" {
   type = list(string)
 }
