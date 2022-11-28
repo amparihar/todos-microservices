@@ -106,3 +106,7 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = local.create_private_subnets ? aws_subnet.private.*.id : []
 }
+
+output "cidr" {
+  value = var.vpc_cidr
+}

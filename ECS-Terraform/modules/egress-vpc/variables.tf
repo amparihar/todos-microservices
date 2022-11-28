@@ -30,3 +30,7 @@ variable "nat_gateways" {
 variable "transit_gateway_id" {
   type = string
 }
+
+variable "app_cidr_blocks" {
+  type = list
+}

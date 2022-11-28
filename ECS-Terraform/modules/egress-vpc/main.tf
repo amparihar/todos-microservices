@@ -52,9 +52,9 @@ resource "aws_route" "public_default" {
 }
 
 resource "aws_route" "public_todos" {
-  count                   = local.create_vpc ? 1 : 0
-  route_table_id          = element(aws_route_table.public.*.id, count.index)
-  destination_cidr_block  = "10.100.0.0/20"
+  count                   = local.create_vpc ? length(var.app_cidr_blocks) : 0
+  route_table_id          = element(aws_route_table.public.*.id, 0)
+  destination_cidr_block  = var.app_cidr_blocks[count.index]
   transit_gateway_id      = var.transit_gateway_id
 }
 

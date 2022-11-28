@@ -48,14 +48,16 @@ resource "aws_ec2_transit_gateway_route_table" "todos" {
   transit_gateway_id = var.transit_gateway_id
   
   tags = {
-      Name = format("tgw-rt-todos-%s-%s",var.app_name,var.stage_name)
+    Name = format("tgw-route-table-outgoing-traffic-%s-%s",var.app_name,var.stage_name)
+    Direction = "outgoing"
   }
 }
 
 resource "aws_ec2_transit_gateway_route_table" "egress" {
   transit_gateway_id = var.transit_gateway_id
   tags = {
-      Name = format("tgw-rt-egress-%s-%s",var.app_name,var.stage_name)
+    Name = format("tgw-route-table-returning-traffic-%s-%s",var.app_name,var.stage_name)
+    Direction = "returning"
   }
 }
 
@@ -69,24 +71,25 @@ resource "aws_ec2_transit_gateway_route_table_association" "egress" {
   transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.egress.id
 }
 
-resource "aws_ec2_transit_gateway_route_table_propagation" "todos" {
-  transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.todos.id
-  transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.todos.id
-}
+# resource "aws_ec2_transit_gateway_route_table_propagation" "todos" {
+#   transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.todos.id
+#   transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.todos.id
+# }
 
-resource "aws_ec2_transit_gateway_route_table_propagation" "egress" {
-  transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.egress.id
-  transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.egress.id
-}
+# resource "aws_ec2_transit_gateway_route_table_propagation" "egress" {
+#   transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.egress.id
+#   transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.egress.id
+# }
 
-resource "aws_ec2_transit_gateway_route" "todos" {
+resource "aws_ec2_transit_gateway_route" "todos_outgoing_traffic" {
   destination_cidr_block         = "0.0.0.0/0"
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.egress.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.todos.id
 }
 
-resource "aws_ec2_transit_gateway_route" "egress" {
-  destination_cidr_block         = "10.100.0.0/20"
-  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.todos.id
-  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.egress.id
+resource "aws_ec2_transit_gateway_route" "egress_returning_traffic" {
+  count                           = length(var.app_cidr_blocks)
+  destination_cidr_block          = var.app_cidr_blocks[count.index]
+  transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.todos.id
+  transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.egress.id
 }

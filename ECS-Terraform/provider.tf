@@ -15,20 +15,19 @@ module "transit_gateway_create" {
 # VPC
 # --------------------------------------------------------------
 
+module "todos_vpc" {
+  source     = "./modules/todos-vpc"
+  app_name   = var.app_name
+  stage_name = var.stage_name
+  transit_gateway_id  = module.transit_gateway_create.transit_gateway_id
+}
 
 module "egress_vpc" {
   source              = "./modules/egress-vpc"
   app_name            = var.app_name
   stage_name          = var.stage_name
   transit_gateway_id  = module.transit_gateway_create.transit_gateway_id
-
-}
-
-module "todos_vpc" {
-  source     = "./modules/todos-vpc"
-  app_name   = var.app_name
-  stage_name = var.stage_name
-  transit_gateway_id  = module.transit_gateway_create.transit_gateway_id
+  app_cidr_blocks     = [module.todos_vpc.cidr]
 }
 
 module "transit_gateway_setup" {
@@ -40,6 +39,7 @@ module "transit_gateway_setup" {
   todos_vpcid         = module.todos_vpc.vpcid
   egress_subnets      = module.egress_vpc.private_subnet_ids
   egress_vpcid        = module.egress_vpc.vpcid
+  app_cidr_blocks     = [module.todos_vpc.cidr]
 }
 
 # --------------------------------------------------------------

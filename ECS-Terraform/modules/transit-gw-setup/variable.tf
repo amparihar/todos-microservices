@@ -24,3 +24,7 @@ variable "egress_subnets" {
 variable "egress_vpcid" {
   type = string
 }
+
+variable "app_cidr_blocks" {
+  type = list
+}
