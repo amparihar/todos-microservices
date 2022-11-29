@@ -2,6 +2,33 @@
 locals {
   vpcid = var.vpcid
 }
+
+
+resource "aws_security_group" "ingress_vpc_sg" {
+  name   = "${var.app_name}-sg-ingress_vpc_sg-${var.stage_name}"
+  vpc_id = local.vpcid
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["10.190.0.0/20"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name  = "sg-ingress-vpc-sg-${var.app_name}"
+    Stage = var.stage_name
+  }
+}
+
+
 resource "aws_security_group" "ecs_load_balanced_frontend_microservices" {
   name   = "${var.app_name}-sg-ecs-load-balanced-frontend-microservices-${var.stage_name}"
   vpc_id = local.vpcid
@@ -10,7 +37,8 @@ resource "aws_security_group" "ecs_load_balanced_frontend_microservices" {
     from_port       = var.container_ports["front_end_microservice"]
     to_port         = var.container_ports["front_end_microservice"]
     protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
+    # security_groups = [var.alb_security_group_id]
+    security_groups = [aws_security_group.ingress_vpc_sg.id]
   }
 
   egress {
@@ -34,19 +62,22 @@ resource "aws_security_group" "ecs_load_balanced_backend_microservices" {
     from_port       = var.container_ports["user_microservice"]
     to_port         = var.container_ports["user_microservice"]
     protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
+    # security_groups = [var.alb_security_group_id]
+    security_groups = [aws_security_group.ingress_vpc_sg.id]
   }
   ingress {
     from_port       = var.container_ports["group_microservice"]
     to_port         = var.container_ports["group_microservice"]
     protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
+    # security_groups = [var.alb_security_group_id]
+    security_groups = [aws_security_group.ingress_vpc_sg.id]
   }
   ingress {
     from_port       = var.container_ports["task_microservice"]
     to_port         = var.container_ports["task_microservice"]
     protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
+    # security_groups = [var.alb_security_group_id]
+    security_groups = [aws_security_group.ingress_vpc_sg.id]
   }
   egress {
     from_port   = 0

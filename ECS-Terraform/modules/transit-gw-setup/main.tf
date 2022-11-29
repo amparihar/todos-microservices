@@ -103,6 +103,11 @@ resource "aws_ec2_transit_gateway_route_table_association" "egress" {
 #   transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.todos.id
 # }
 
+# resource "aws_ec2_transit_gateway_route_table_propagation" "ingress" {
+#   transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.ingress.id
+#   transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.ingress.id
+# }
+
 # resource "aws_ec2_transit_gateway_route_table_propagation" "egress" {
 #   transit_gateway_attachment_id   = aws_ec2_transit_gateway_vpc_attachment.egress.id
 #   transit_gateway_route_table_id  = aws_ec2_transit_gateway_route_table.egress.id

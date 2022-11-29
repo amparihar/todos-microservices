@@ -62,8 +62,10 @@ module "alb" {
   source                       = "./modules/load-balancer"
   app_name                     = var.app_name
   stage_name                   = var.stage_name
-  vpcid                        = module.todos_vpc.vpcid
-  subnets                      = module.todos_vpc.public_subnet_ids
+  # vpcid                        = module.todos_vpc.vpcid
+  vpcid                        = module.ingress_vpc.vpcid
+  subnets                      = module.ingress_vpc.public_subnet_ids
+  app_vpcid                    = module.todos_vpc.vpcid
   enable_blue_green_deployment = var.app_enable_blue_green_deployment
 }
 
@@ -85,6 +87,7 @@ module "sg" {
   stage_name            = var.stage_name
   vpcid                 = module.todos_vpc.vpcid
   container_ports       = var.app_container_ports
+  # Depricated SG
   alb_security_group_id = module.alb.security_group_id
 }
 

@@ -11,6 +11,9 @@ variable "create_alb" {
 variable "vpcid" {
   type = string
 }
+variable "app_vpcid" {
+  type = string
+}
 variable "subnets" {
   type = list(string)
 }

@@ -1,5 +1,8 @@
 locals {
-  name_suffix = "${var.app_name}-${var.stage_name}"
+  name_suffix     = "${var.app_name}-${var.stage_name}"
+  ingress_vpcid   = var.vpcid
+  ingress_subnets = var.subnets
+  todos_vpcid     = var.app_vpcid
 }
 
 resource "aws_lb" "main" {
@@ -9,7 +12,7 @@ resource "aws_lb" "main" {
   load_balancer_type = "application"
   # mandatory for alb
   security_groups = [aws_security_group.alb.id]
-  subnets         = var.subnets
+  subnets         = local.ingress_subnets
 
   tags = {
     Name  = "alb-${var.app_name}-${count.index + 1}"
@@ -24,7 +27,7 @@ resource "aws_lb" "main" {
 # load balancer security group
 resource "aws_security_group" "alb" {
   name   = "${var.app_name}-sg-alb-ecs-${var.stage_name}"
-  vpc_id = var.vpcid
+  vpc_id = local.ingress_vpcid
 
   ingress {
     from_port   = 80
@@ -58,7 +61,7 @@ resource "aws_lb_target_group" "tg_user_microservice" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = var.vpcid
+  vpc_id      = local.todos_vpcid
 
   health_check {
     healthy_threshold   = 3
@@ -81,7 +84,7 @@ resource "aws_lb_target_group" "tg_group_microservice" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = var.vpcid
+  vpc_id      = local.todos_vpcid
 
   health_check {
     healthy_threshold   = 3
@@ -104,7 +107,7 @@ resource "aws_lb_target_group" "tg_task_microservice" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = var.vpcid
+  vpc_id      = local.todos_vpcid
 
   health_check {
     healthy_threshold   = 3
@@ -127,7 +130,7 @@ resource "aws_lb_target_group" "tg_front_end_microservice" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = var.vpcid
+  vpc_id      = local.todos_vpcid
 
   health_check {
     healthy_threshold   = 3
@@ -151,7 +154,7 @@ resource "aws_lb_target_group" "tg_green_front_end_microservice" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = var.vpcid
+  vpc_id      = local.todos_vpcid
 
   health_check {
     healthy_threshold   = 3

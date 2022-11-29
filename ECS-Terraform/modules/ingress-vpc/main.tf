@@ -18,7 +18,7 @@ resource "aws_vpc" "ingress" {
 # One public subnet in each of the 2 AZs
 resource "aws_subnet" "public" {
   count                   = local.create_vpc ? length(slice(local.azs, 0, 2)) : 0
-  vpc_id                  = element(aws_vpc.egress.*.id, 0)
+  vpc_id                  = element(aws_vpc.ingress.*.id, 0)
   availability_zone       = element(local.azs, count.index)
   cidr_block              = element(var.public_subnets, count.index)
   map_public_ip_on_launch = true
