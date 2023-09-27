@@ -1,5 +1,5 @@
 // {
-//     "taskDefinitionArn": "arn:aws:ecs:us-east-2:785548451685:task-definition/td-front-end-microservice-mytodos-nonprod:14",
+//     "taskDefinitionArn": "arn:aws:ecs:us-east-2:XXX:task-definition/td-front-end-microservice-mytodos-nonprod:14",
 //     "containerDefinitions": [
 //         {
 //             "name": "front-end-microservice-mytodos-nonprod",
@@ -32,8 +32,8 @@
 //         }
 //     ],
 //     "family": "td-front-end-microservice-mytodos-nonprod",
-//     "taskRoleArn": "arn:aws:iam::785548451685:role/terraform-20230927064717288100000005",
-//     "executionRoleArn": "arn:aws:iam::785548451685:role/terraform-20230927064717271600000002",
+//     "taskRoleArn": "arn:aws:iam::XXX:role/terraform-20230927064717288100000005",
+//     "executionRoleArn": "arn:aws:iam::XXX:role/terraform-20230927064717271600000002",
 //     "networkMode": "awsvpc",
 //     "revision": 14,
 //     "volumes": [],
@@ -60,7 +60,7 @@
 //     "cpu": "512",
 //     "memory": "1024",
 //     "registeredAt": "2023-09-27T06:50:01.744Z",
-//     "registeredBy": "arn:aws:iam::785548451685:user/amitp",
+//     "registeredBy": "arn:aws:iam::XXX:user/amitp",
 //     "tags": [
 //         {
 //         "key": "Name",
