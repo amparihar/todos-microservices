@@ -1,0 +1,70 @@
+// {
+//     "taskDefinitionArn": "arn:aws:ecs:us-east-2:785548451685:task-definition/td-front-end-microservice-mytodos-nonprod:14",
+//     "containerDefinitions": [
+//         {
+//             "name": "front-end-microservice-mytodos-nonprod",
+//             "image": "<IMAGE1_NAME>",
+//             "cpu": 0,
+//             "portMappings": [
+//                 {
+//                     "containerPort": 3000,
+//                     "hostPort": 3000,
+//                     "protocol": "tcp"
+//                 }
+//             ],
+//             "essential": true,
+//             "environment": [
+//                 {
+//                     "name": "USER_API_BASE_URL",
+//                     "value": "http://alb-ecs-mytodos-nonprod-264739383.us-east-2.elb.amazonaws.com/api"
+//                 },
+//                 {
+//                     "name": "TASK_API_BASE_URL",
+//                     "value": "http://alb-ecs-mytodos-nonprod-264739383.us-east-2.elb.amazonaws.com/api"
+//                 },
+//                 {
+//                     "name": "GROUP_API_BASE_URL",
+//                     "value": "http://alb-ecs-mytodos-nonprod-264739383.us-east-2.elb.amazonaws.com/api"
+//                 }
+//             ],
+//             "mountPoints": [],
+//             "volumesFrom": []
+//         }
+//     ],
+//     "family": "td-front-end-microservice-mytodos-nonprod",
+//     "taskRoleArn": "arn:aws:iam::785548451685:role/terraform-20230927064717288100000005",
+//     "executionRoleArn": "arn:aws:iam::785548451685:role/terraform-20230927064717271600000002",
+//     "networkMode": "awsvpc",
+//     "revision": 14,
+//     "volumes": [],
+//     "status": "ACTIVE",
+//     "requiresAttributes": [
+//         {
+//             "name": "com.amazonaws.ecs.capability.task-iam-role"
+//         },
+//         {
+//             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+//         },
+//         {
+//             "name": "ecs.capability.task-eni"
+//         }
+//     ],
+//     "placementConstraints": [],
+//     "compatibilities": [
+//         "EC2",
+//         "FARGATE"
+//     ],
+//     "requiresCompatibilities": [
+//         "FARGATE"
+//     ],
+//     "cpu": "512",
+//     "memory": "1024",
+//     "registeredAt": "2023-09-27T06:50:01.744Z",
+//     "registeredBy": "arn:aws:iam::785548451685:user/amitp",
+//     "tags": [
+//         {
+//         "key": "Name",
+//         "value": "td-front-end-microservice-mytodos-nonprod-pipeline"
+//       }
+//     ]
+// }
