@@ -1,0 +1,9 @@
+services:
+    terraform:
+        image: hashicorp/terraform:0.13.1
+        volumes:
+            - .:/deploy
+        working_dir: /deploy
+        environment:
+            - AWS_ACCESS_KEY_ID:${AWS_ACCESS_KEY_ID}
+            - AWS_SECRET_ACCESS_KEY:${AWS_SECRET_ACCESS_KEY}

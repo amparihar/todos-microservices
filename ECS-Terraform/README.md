@@ -18,3 +18,15 @@ terraform plan -out out.plan
 terraform apply out.plan
 
 terraform destroy
+
+## docker-compose install
+----------------------------------------
+
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+----------------------------------------
+
+docker-compose -f docker-compose.yaml run --rm terraform fmt
+docker-compose -f docker-compose.yaml run --rm terraform validate
